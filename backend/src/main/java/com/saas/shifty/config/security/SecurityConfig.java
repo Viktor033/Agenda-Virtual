@@ -30,7 +30,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**", "/api/v1/provision/**").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/api/v1/provision/**", "/api/v1/whatsapp/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class);

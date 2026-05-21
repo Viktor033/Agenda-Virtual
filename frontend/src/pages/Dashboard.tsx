@@ -15,6 +15,7 @@ import { PatientsTab } from '../components/PatientsTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { SaaSAdminTab } from '../components/SaaSAdminTab';
 import { SaaSUsersTab } from '../components/SaaSUsersTab';
+import { WhatsAppBotTab } from '../components/WhatsAppBotTab';
 import { Professional, Appointment, Service, Patient } from '../types';
 
 interface DashboardProps {
@@ -665,6 +666,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             />
           )}
 
+          {/* VISTA BOT DE WHATSAPP */}
+          {user.role !== 'ADMIN' && currentTab === 'whatsapp_bot' && (
+            <WhatsAppBotTab />
+          )}
+
           {/* VISTA CONFIGURACION */}
           {user.role !== 'ADMIN' && currentTab === 'settings' && (
             <SettingsTab
@@ -743,7 +749,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
           {/* VISTA EN CONSTRUCCIÓN (OTRAS PESTAÑAS) */}
           {currentTab !== 'agenda' && currentTab !== 'professionals' && currentTab !== 'services' && 
-           currentTab !== 'patients' && currentTab !== 'settings' && 
+           currentTab !== 'patients' && currentTab !== 'settings' && currentTab !== 'whatsapp_bot' &&
            currentTab !== 'saas_billing' && currentTab !== 'saas_users' && currentTab !== 'saas_settings' && (
             <div className="flex-1 bg-white border border-slate-100 rounded-2xl flex flex-col items-center justify-center p-12 text-slate-400">
               <svg className="w-16 h-16 text-slate-300 stroke-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
