@@ -120,7 +120,7 @@ export const WhatsAppBotTab: React.FC = () => {
     if (currentState === 'SELECT_SLOT') {
       if (['1', '2', '3'].includes(text)) {
         setCurrentState('WELCOME');
-        return `🎉 *¡Excelente! Tu turno ha sido agendado con éxito:*\n\n🏥 *Especialista:* Dra. Clara Ortega\n💆‍♂️ *Tratamiento:* Consulta de Diagnóstico\n📆 *Día:* Mañana\n⏰ *Hora:* 09:00 hs\n\nTe hemos enviado la confirmación. ¡Te esperamos! 😊\n\n_Escribe cualquier mensaje si necesitas volver al menú principal._`;
+        return `🎉 *¡Excelente! Tu turno ha sido agendado con éxito:*\n\n🏥 *Especialista:* Dra. Clara Ortega\n💆‍♂️ *Tratamiento:* Consulta de Diagnóstico\n📆 *Día:* Mañana\n⏰ *Hora:* 09:00 hs\n\nTe hemos enviado la confirmación. ¡Te esperamos! 😊\n\n⚠️ *Recuerda:* Los turnos se cancelan con 24 hs de anticipación, de lo contrario se cobrará el valor del mismo.\n\n_Escribe cualquier mensaje si necesitas volver al menú principal._`;
       }
       return 'Por favor, ingresa el número correspondiente al turno deseado.';
     }

@@ -302,6 +302,7 @@ public class WhatsAppService {
                            "📆 *Día:* %s\n" +
                            "⏰ *Hora:* %s hs\n\n" +
                            "Te hemos enviado la confirmación. ¡Te esperamos! 😊\n\n" +
+                           "⚠️ *Recuerda:* Los turnos se cancelan con 24 hs de anticipación, de lo contrario se cobrará el valor del mismo.\n\n" +
                            "_Escribe cualquier mensaje si necesitas volver al menú principal._",
                             finalProfName, serviceName, chosenTime.format(DATE_FORMATTER), chosenTime.format(TIME_FORMATTER));
 
