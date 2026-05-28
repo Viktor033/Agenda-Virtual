@@ -1,8 +1,11 @@
+server:
+  port: 8082
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/agenda_multi_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: ''
+    password: 'Vik147_Dua216$'
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -16,6 +19,12 @@ spring:
     user:
       name: admin
       password: admin_secret_pass
+
+app:
+  jwt:
+    # Secret de 256 bits codificado en Base64. Reemplazar en producción por variable de entorno.
+    secret: "c2hpZnR5LXNhYXMtbXVsdGl0ZW5hbnQtand0LXNlY3JldC1rZXktMjAyNi1wcm9kdWN0aW9u"
+    expiration-ms: 86400000   # 24 horas en milisegundos
 
 logging:
   level:

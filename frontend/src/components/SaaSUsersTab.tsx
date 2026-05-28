@@ -1,6 +1,44 @@
 import React from 'react';
 import { Professional } from '../types';
 
+const getRubroBadge = (rubro: string | undefined, specialty: string) => {
+  const normalized = rubro?.toLowerCase().trim() || specialty?.toLowerCase().trim() || 'medicina';
+  
+  if (normalized.includes('medicina')) {
+    return {
+      text: rubro || 'Medicina',
+      emoji: '🩺',
+      classes: 'bg-blue-50 text-blue-700 border-blue-150',
+    };
+  }
+  if (normalized.includes('veterinaria')) {
+    return {
+      text: rubro || 'Veterinaria',
+      emoji: '🐾',
+      classes: 'bg-emerald-50 text-emerald-700 border-emerald-150',
+    };
+  }
+  if (normalized.includes('peluquería') || normalized.includes('peluqueria')) {
+    return {
+      text: rubro || 'Peluquería',
+      emoji: '✂️',
+      classes: 'bg-purple-50 text-purple-700 border-purple-150',
+    };
+  }
+  if (normalized.includes('barbería') || normalized.includes('barberia')) {
+    return {
+      text: rubro || 'Barbería',
+      emoji: '💈',
+      classes: 'bg-amber-50 text-amber-700 border-amber-150',
+    };
+  }
+  return {
+    text: rubro || specialty || 'Otro',
+    emoji: '🏷️',
+    classes: 'bg-slate-50 text-slate-700 border-slate-200',
+  };
+};
+
 interface SaaSUsersTabProps {
   users: Professional[];
   onOpenAddModal: () => void;
@@ -85,9 +123,21 @@ export const SaaSUsersTab: React.FC<SaaSUsersTabProps> = ({
                   <h3 className="font-bold text-slate-800 text-sm truncate leading-snug group-hover:text-indigo-600 transition-colors pr-14">
                     {u.name}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-bold block mt-0.5">{u.specialty}</span>
                   
-                  <span className="text-[10px] text-slate-500 font-medium truncate block mt-2">
+                  {/* Badge de Rubro */}
+                  {(() => {
+                    const badge = getRubroBadge(u.rubro, u.specialty);
+                    return (
+                      <div className="mt-1">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[10px] font-bold tracking-wide ${badge.classes}`}>
+                          <span>{badge.emoji}</span>
+                          <span>{badge.text}</span>
+                        </span>
+                      </div>
+                    );
+                  })()}
+                  
+                  <span className="text-[10px] text-slate-500 font-medium truncate block mt-2.5">
                     📧 {u.email || 'sin-correo@gmail.com'}
                   </span>
                 </div>

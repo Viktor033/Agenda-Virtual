@@ -14,6 +14,7 @@ interface NewSaaSUserModalProps {
     plan: string;
     status: 'active' | 'suspended';
     password?: string;
+    rubro?: string;
   }) => void;
 }
 
@@ -30,6 +31,8 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
   const [plan, setPlan] = useState('Plan Estándar');
   const [status, setStatus] = useState<'active' | 'suspended'>('active');
   const [password, setPassword] = useState('admin'); // Contraseña por defecto "admin" para facilitar pruebas
+  const [rubro, setRubro] = useState('Medicina');
+  const [customRubro, setCustomRubro] = useState('');
 
   // Precargar datos si estamos editando
   useEffect(() => {
@@ -41,14 +44,38 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
       setPlan(userToEdit.plan || 'Plan Estándar');
       setStatus(userToEdit.status || 'active');
       setPassword(userToEdit.password || 'admin');
+      
+      const predefOptions = ['Medicina', 'Veterinaria', 'Peluquería', 'Barbería'];
+      if (userToEdit.rubro) {
+        if (predefOptions.includes(userToEdit.rubro)) {
+          setRubro(userToEdit.rubro);
+          setCustomRubro('');
+        } else {
+          setRubro('Otro');
+          setCustomRubro(userToEdit.rubro);
+        }
+      } else if (userToEdit.specialty) {
+        if (predefOptions.includes(userToEdit.specialty)) {
+          setRubro(userToEdit.specialty);
+          setCustomRubro('');
+        } else {
+          setRubro('Otro');
+          setCustomRubro(userToEdit.specialty);
+        }
+      } else {
+        setRubro('Medicina');
+        setCustomRubro('');
+      }
     } else {
       setName('');
-      setSpecialty('');
+      setSpecialty('Medicina');
       setEmail('');
       setColor('indigo');
       setPlan('Plan Estándar');
       setStatus('active');
       setPassword('admin');
+      setRubro('Medicina');
+      setCustomRubro('');
     }
   }, [userToEdit, isOpen]);
 
@@ -56,19 +83,21 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !specialty || !email || !password) {
+    const finalRubro = rubro === 'Otro' ? customRubro : rubro;
+    if (!name || !email || !password || !finalRubro) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
     onSubmit({
       id: userToEdit?.id,
       name,
-      specialty,
+      specialty: finalRubro,
       email,
       color,
       plan,
       status,
       password,
+      rubro: finalRubro
     });
   };
 
@@ -119,18 +148,48 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
               />
             </div>
 
-            {/* Rubro / Especialidad */}
+            {/* Rubro Comercial */}
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Especialidad / Rubro B2B *</label>
-              <input
-                type="text"
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                placeholder="ej. Odontopediatría, Nutrición, Consultorio"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all font-semibold text-slate-700"
-                required
-              />
+              <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Rubro Comercial *</label>
+              <select
+                value={rubro}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setRubro(val);
+                  if (val !== 'Otro') {
+                    setSpecialty(val);
+                  } else {
+                    setSpecialty(customRubro);
+                  }
+                }}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 font-semibold text-slate-700 transition-all"
+              >
+                <option value="Medicina">🩺 Medicina</option>
+                <option value="Veterinaria">🐾 Veterinaria</option>
+                <option value="Peluquería">✂️ Peluquería</option>
+                <option value="Barbería">💈 Barbería</option>
+                <option value="Otro">🏷️ Otro (Personalizado)</option>
+              </select>
             </div>
+
+            {/* Rubro Personalizado (Condicional) */}
+            {rubro === 'Otro' && (
+              <div className="animate-slide-down">
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Especificar Rubro *</label>
+                <input
+                  type="text"
+                  value={customRubro}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCustomRubro(val);
+                    setSpecialty(val);
+                  }}
+                  placeholder="ej. Centro de Estética, Kinesiología"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all font-semibold text-slate-700"
+                  required
+                />
+              </div>
+            )}
 
             {/* Email de Login */}
             <div>

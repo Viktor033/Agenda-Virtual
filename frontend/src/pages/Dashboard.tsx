@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { NewAppointmentModal } from '../components/NewAppointmentModal';
@@ -17,14 +17,13 @@ import { SaaSAdminTab } from '../components/SaaSAdminTab';
 import { SaaSUsersTab } from '../components/SaaSUsersTab';
 import { WhatsAppBotTab } from '../components/WhatsAppBotTab';
 import { Professional, Appointment, Service, Patient } from '../types';
+import { UserSession } from '../services/authService';
+import * as patientService from '../services/patientService';
+import * as serviceService from '../services/serviceService';
+import * as appointmentService from '../services/appointmentService';
 
 interface DashboardProps {
-  user: {
-    email: string;
-    name: string;
-    role: 'ADMIN' | 'PROFESSIONAL';
-    professionalId?: number;
-  };
+  user: UserSession;
   onLogout: () => void;
 }
 
@@ -85,9 +84,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       }
     }
     return [
-      { id: 1, name: 'Clara Ortega', specialty: 'Especialista Senior', avatar: 'https://images.unsplash.com/photo-1594824813573-246434e33963?w=100&h=100&fit=crop', color: 'indigo', email: 'clara@gmail.com', plan: 'Premium Dental', status: 'active', role: 'specialist', password: 'admin' },
-      { id: 2, name: 'Mateo Ramos', specialty: 'Especialista Técnico', avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&h=100&fit=crop', color: 'emerald', email: 'mateo@gmail.com', plan: 'Plan Estándar', status: 'active', role: 'specialist', password: 'admin' },
-      { id: 3, name: 'Sofia Ortiz', specialty: 'Asesor General', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop', color: 'violet', email: 'sofia@gmail.com', plan: 'Plan Estándar', status: 'active', role: 'specialist', password: 'admin' }
+      { id: 1, name: 'Clara Ortega', specialty: 'Odontopediatría', avatar: 'https://images.unsplash.com/photo-1594824813573-246434e33963?w=100&h=100&fit=crop', color: 'indigo', email: 'clara@gmail.com', plan: 'Premium Dental', status: 'active', role: 'specialist', password: 'admin', rubro: 'Medicina' },
+      { id: 2, name: 'Mateo Ramos', specialty: 'Veterinaria General', avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&h=100&fit=crop', color: 'emerald', email: 'mateo@gmail.com', plan: 'Plan Estándar', status: 'active', role: 'specialist', password: 'admin', rubro: 'Veterinaria' },
+      { id: 3, name: 'Sofia Ortiz', specialty: 'Estilista Unisex', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop', color: 'violet', email: 'sofia@gmail.com', plan: 'Plan Estándar', status: 'active', role: 'specialist', password: 'admin', rubro: 'Peluquería' }
     ];
   });
 
@@ -101,14 +100,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     ? allProfessionals.filter(p => p.id === user.professionalId)
     : allProfessionals;
 
-  // Lista mutable de Servicios (Estado React)
+  // Lista mutable de Servicios — carga desde API con fallback local
   const [services, setServices] = useState<Service[]>([
     { id: 1, name: 'Consulta de Diagnóstico', durationMinutes: 30, price: 35.00 },
     { id: 2, name: 'Servicio Estándar', durationMinutes: 60, price: 80.00 },
     { id: 3, name: 'Asesoría Personalizada', durationMinutes: 45, price: 50.00 }
   ]);
 
-  // Lista mutable de Pacientes (Estado React)
+  // Lista mutable de Pacientes — carga desde API con fallback local
   const [patients, setPatients] = useState<Patient[]>([
     { id: 1, name: 'Juan Pérez', email: 'juan@gmail.com', phone: '+54 9 11 2233-4455' },
     { id: 2, name: 'Maria Sosa', email: 'maria@gmail.com', phone: '+54 9 11 9988-7766' },
@@ -120,6 +119,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     { id: 102, professionalId: 1, patientId: 2, patientName: 'Maria Sosa', serviceName: 'Asesoría Personalizada', startTime: '2026-05-19T10:30:00', endTime: '2026-05-19T11:15:00', status: 'pending' },
     { id: 103, professionalId: 2, patientId: 3, patientName: 'Roberto Gil', serviceName: 'Servicio Estándar', startTime: '2026-05-19T10:00:00', endTime: '2026-05-19T11:00:00', status: 'confirmed' }
   ]);
+
+  // ─── Carga inicial desde la API ──────────────────────────────────────────────
+  // Solo para el rol PROFESSIONAL (el ADMIN usa sus propios datos de SaaS)
+  useEffect(() => {
+    if (user.role !== 'PROFESSIONAL') return;
+
+    const loadData = async () => {
+      try {
+        const [fetchedPatients, fetchedServices, fetchedAppointments] = await Promise.all([
+          patientService.getPatients(),
+          serviceService.getServices(),
+          appointmentService.getAppointments(),
+        ]);
+        setPatients(fetchedPatients);
+        setServices(fetchedServices);
+        setAppointments(fetchedAppointments);
+      } catch {
+        // Backend no disponible: los estados ya tienen datos de demo como fallback
+        console.warn('Backend no disponible. Usando datos de demo locales.');
+      }
+    };
+
+    loadData();
+  }, [user.role]);
 
   const handleTimeSlotClick = (professionalId: number, hour: number) => {
     setTargetProfId(professionalId);
@@ -151,6 +174,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     ));
     setSuccessTitle('¡Cita Confirmada!');
     setSuccessMessage('El estado del turno se actualizó a confirmado satisfactoriamente.');
+    setIsSuccessOpen(true);
+  };
+
+  // Limpiar Turnos Cancelados reactivamente
+  const handleClearCancelledAppointments = () => {
+    setAppointments(appointments.filter(app => app.status !== 'cancelled'));
+    setSuccessTitle('¡Limpieza Exitosa!');
+    setSuccessMessage('Se han eliminado todos los turnos cancelados del calendario.');
     setIsSuccessOpen(true);
   };
 
@@ -395,6 +426,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     plan: string;
     status: 'active' | 'suspended';
     password?: string;
+    rubro?: string;
   }) => {
     if (data.id) {
       // Modificar inquilino
@@ -407,7 +439,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             color: data.color, 
             plan: data.plan, 
             status: data.status,
-            password: data.password || p.password
+            password: data.password || p.password,
+            rubro: data.rubro
           }
         : p
       ));
@@ -434,7 +467,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         plan: data.plan,
         status: data.status,
         role: 'specialist',
-        password: data.password || 'admin' // password personalizado
+        password: data.password || 'admin', // password personalizado
+        rubro: data.rubro
       };
       setAllProfessionals([...allProfessionals, newTenant]);
       setSuccessTitle('¡Cliente Registrado!');
@@ -590,19 +624,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </button>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setTargetProfId(user.role === 'PROFESSIONAL' ? user.professionalId : undefined);
-                    setTargetHour(undefined);
-                    setIsModalOpen(true);
-                  }}
-                  className={`w-full sm:w-auto px-5 py-2.5 ${theme.bg} text-white rounded-xl font-semibold text-xs md:text-sm shadow-md ${theme.shadow} transition-all duration-200 flex items-center justify-center gap-2`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Nuevo Turno
-                </button>
+                <div className="flex gap-2.5 w-full sm:w-auto">
+                  {appointments.some(app => app.status === 'cancelled') && (
+                    <button
+                      onClick={handleClearCancelledAppointments}
+                      className="w-full sm:w-auto px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 rounded-xl font-semibold text-xs md:text-sm shadow-sm hover:shadow-rose-100/10 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Limpiar Cancelados
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setTargetProfId(user.role === 'PROFESSIONAL' ? user.professionalId : undefined);
+                      setTargetHour(undefined);
+                      setIsModalOpen(true);
+                    }}
+                    className={`w-full sm:w-auto px-5 py-2.5 ${theme.bg} text-white rounded-xl font-semibold text-xs md:text-sm shadow-md ${theme.shadow} transition-all duration-200 flex items-center justify-center gap-2`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Turno
+                  </button>
+                </div>
               </div>
 
 

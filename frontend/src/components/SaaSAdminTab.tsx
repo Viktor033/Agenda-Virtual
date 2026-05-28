@@ -9,16 +9,34 @@ interface TenantSubscription {
   monthlyPrice: number;
   status: 'paid' | 'pending' | 'unpaid';
   lastPaymentDate: string;
+  rubro: string;
 }
+
+const getRubroBadge = (rubro: string) => {
+  const normalized = rubro?.toLowerCase().trim() || 'medicina';
+  if (normalized.includes('medicina')) {
+    return { text: rubro, emoji: '🩺', classes: 'bg-blue-50 text-blue-700 border-blue-150' };
+  }
+  if (normalized.includes('veterinaria')) {
+    return { text: rubro, emoji: '🐾', classes: 'bg-emerald-50 text-emerald-700 border-emerald-150' };
+  }
+  if (normalized.includes('peluquería') || normalized.includes('peluqueria')) {
+    return { text: rubro, emoji: '✂️', classes: 'bg-purple-50 text-purple-700 border-purple-150' };
+  }
+  if (normalized.includes('barbería') || normalized.includes('barberia')) {
+    return { text: rubro, emoji: '💈', classes: 'bg-amber-50 text-amber-700 border-amber-150' };
+  }
+  return { text: rubro || 'Otro', emoji: '🏷️', classes: 'bg-slate-50 text-slate-700 border-slate-200' };
+};
 
 export const SaaSAdminTab: React.FC = () => {
   // Lista inicial de clínicas/inquilinos que contrataron el SaaS
   const [tenants, setTenants] = useState<TenantSubscription[]>([
-    { id: 1, businessName: 'Clínica Clara Ortega', ownerName: 'Dra. Clara Ortega', planName: 'Premium Dental', monthlyPrice: 250.00, status: 'paid', lastPaymentDate: '2026-05-10' },
-    { id: 2, businessName: 'Consultorio Kinesiología Ramos', ownerName: 'Lic. Mateo Ramos', planName: 'Plan Estándar', monthlyPrice: 180.00, status: 'paid', lastPaymentDate: '2026-05-08' },
-    { id: 3, businessName: 'Centro Estético Sofia Ortiz', ownerName: 'Dra. Sofia Ortiz', planName: 'Plan Estándar', monthlyPrice: 180.00, status: 'pending', lastPaymentDate: '2026-04-28' },
-    { id: 4, businessName: 'Clínica Médica del Sol', ownerName: 'Dr. Alejandro Gil', planName: 'Platinum Ilimitado', monthlyPrice: 450.00, status: 'paid', lastPaymentDate: '2026-05-12' },
-    { id: 5, businessName: 'Estudio de Rehabilitación Sur', ownerName: 'Lic. Roberto Sosa', planName: 'Premium Dental', monthlyPrice: 250.00, status: 'unpaid', lastPaymentDate: '2026-04-05' }
+    { id: 1, businessName: 'Clínica Clara Ortega', ownerName: 'Dra. Clara Ortega', planName: 'Premium Dental', monthlyPrice: 250.00, status: 'paid', lastPaymentDate: '2026-05-10', rubro: 'Medicina' },
+    { id: 2, businessName: 'Consultorio Kinesiología Ramos', ownerName: 'Lic. Mateo Ramos', planName: 'Plan Estándar', monthlyPrice: 180.00, status: 'paid', lastPaymentDate: '2026-05-08', rubro: 'Veterinaria' },
+    { id: 3, businessName: 'Centro Estético Sofia Ortiz', ownerName: 'Dra. Sofia Ortiz', planName: 'Plan Estándar', monthlyPrice: 180.00, status: 'pending', lastPaymentDate: '2026-04-28', rubro: 'Peluquería' },
+    { id: 4, businessName: 'Clínica Médica del Sol', ownerName: 'Dr. Alejandro Gil', planName: 'Platinum Ilimitado', monthlyPrice: 450.00, status: 'paid', lastPaymentDate: '2026-05-12', rubro: 'Medicina' },
+    { id: 5, businessName: 'Estudio de Rehabilitación Sur', ownerName: 'Lic. Roberto Sosa', planName: 'Premium Dental', monthlyPrice: 250.00, status: 'unpaid', lastPaymentDate: '2026-04-05', rubro: 'Barbería' }
   ]);
 
   // Estados de Modales
@@ -39,6 +57,8 @@ export const SaaSAdminTab: React.FC = () => {
   const [planName, setPlanName] = useState('Plan Estándar');
   const [monthlyPrice, setMonthlyPrice] = useState(180);
   const [status, setStatus] = useState<'paid' | 'pending' | 'unpaid'>('paid');
+  const [rubro, setRubro] = useState('Medicina');
+  const [customRubro, setCustomRubro] = useState('');
 
   // Abrir Modal de Registro
   const handleOpenAddModal = () => {
@@ -48,6 +68,8 @@ export const SaaSAdminTab: React.FC = () => {
     setPlanName('Plan Estándar');
     setMonthlyPrice(180);
     setStatus('paid');
+    setRubro('Medicina');
+    setCustomRubro('');
     setIsEditModalOpen(true);
   };
 
@@ -59,6 +81,15 @@ export const SaaSAdminTab: React.FC = () => {
     setPlanName(tenant.planName);
     setMonthlyPrice(tenant.monthlyPrice);
     setStatus(tenant.status);
+    
+    const predefOptions = ['Medicina', 'Veterinaria', 'Peluquería', 'Barbería'];
+    if (predefOptions.includes(tenant.rubro)) {
+      setRubro(tenant.rubro);
+      setCustomRubro('');
+    } else {
+      setRubro('Otro');
+      setCustomRubro(tenant.rubro || '');
+    }
     setIsEditModalOpen(true);
   };
 
@@ -68,6 +99,7 @@ export const SaaSAdminTab: React.FC = () => {
     if (!businessName || !ownerName) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
+    const finalRubro = rubro === 'Otro' ? customRubro : rubro;
 
     if (selectedTenantToEdit) {
       // Modificar existente
@@ -79,7 +111,8 @@ export const SaaSAdminTab: React.FC = () => {
             planName,
             monthlyPrice: Number(monthlyPrice),
             status,
-            lastPaymentDate: status === 'paid' ? todayStr : t.lastPaymentDate
+            lastPaymentDate: status === 'paid' ? todayStr : t.lastPaymentDate,
+            rubro: finalRubro
           }
         : t
       ));
@@ -94,7 +127,8 @@ export const SaaSAdminTab: React.FC = () => {
         planName,
         monthlyPrice: Number(monthlyPrice),
         status,
-        lastPaymentDate: status === 'paid' ? todayStr : '-'
+        lastPaymentDate: status === 'paid' ? todayStr : '-',
+        rubro: finalRubro
       };
       setTenants([...tenants, newTenant]);
       setSuccessTitle('Cliente de Pago Registrado');
@@ -224,6 +258,7 @@ export const SaaSAdminTab: React.FC = () => {
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="py-4 px-6">Identificador / Empresa</th>
                 <th className="py-4 px-6">Profesional Responsable</th>
+                <th className="py-4 px-6">Rubro</th>
                 <th className="py-4 px-6">Plan Suscripto</th>
                 <th className="py-4 px-6">Costo Mensual</th>
                 <th className="py-4 px-6">Estado de Pago</th>
@@ -241,6 +276,17 @@ export const SaaSAdminTab: React.FC = () => {
                     </div>
                   </td>
                   <td className="py-4 px-6 font-medium text-slate-600">{t.ownerName}</td>
+                  <td className="py-4 px-6">
+                    {(() => {
+                      const badge = getRubroBadge(t.rubro);
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[10px] font-bold tracking-wide ${badge.classes}`}>
+                          <span>{badge.emoji}</span>
+                          <span>{badge.text}</span>
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="py-4 px-6">
                     <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/50 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
                       {t.planName}
@@ -359,6 +405,37 @@ export const SaaSAdminTab: React.FC = () => {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-300 font-semibold text-slate-700"
                 />
               </div>
+
+              {/* Rubro Comercial */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Rubro Comercial *</label>
+                <select
+                  value={rubro}
+                  onChange={(e) => setRubro(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-300 font-semibold text-slate-700 transition-all"
+                >
+                  <option value="Medicina">🩺 Medicina</option>
+                  <option value="Veterinaria">🐾 Veterinaria</option>
+                  <option value="Peluquería">✂️ Peluquería</option>
+                  <option value="Barbería">💈 Barbería</option>
+                  <option value="Otro">🏷️ Otro (Personalizado)</option>
+                </select>
+              </div>
+
+              {/* Rubro Personalizado (Condicional) */}
+              {rubro === 'Otro' && (
+                <div className="animate-slide-down">
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Especificar Rubro *</label>
+                  <input
+                    type="text"
+                    required
+                    value={customRubro}
+                    onChange={(e) => setCustomRubro(e.target.value)}
+                    placeholder="ej. Centro de Estética, Kinesiología"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-300 font-semibold text-slate-700"
+                  />
+                </div>
+              )}
 
               {/* Grid Plan y Precio */}
               <div className="grid grid-cols-2 gap-4">

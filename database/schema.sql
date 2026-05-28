@@ -145,8 +145,31 @@ CREATE TABLE IF NOT EXISTS `appointments` (
 PARTITION BY HASH(`tenant_id`)
 PARTITIONS 32;
 
+
 -- ----------------------------------------------------------------------------
--- 8. TABLA: audit_logs
+-- 8. TABLA: subscriptions
+-- Almacena la suscripción activa e historial de pagos de cada tenant.
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+    `tenant_id` BIGINT NOT NULL,
+    `id` BIGINT AUTO_INCREMENT NOT NULL,
+    `stripe_customer_id` VARCHAR(255) NULL,
+    `stripe_subscription_id` VARCHAR(255) NULL,
+    `plan_type` ENUM('basic', 'standard', 'premium') NOT NULL DEFAULT 'basic',
+    `status` VARCHAR(50) NOT NULL DEFAULT 'incomplete',
+    `current_period_end` TIMESTAMP NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`tenant_id`, `id`),
+    KEY `idx_subscription_id` (`id`),
+    CONSTRAINT `fk_subscriptions_tenant` FOREIGN KEY (`tenant_id`) 
+        REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+PARTITION BY HASH(`tenant_id`)
+PARTITIONS 32;
+
+-- ----------------------------------------------------------------------------
+-- 9. TABLA: audit_logs
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `audit_logs` (
     `tenant_id` BIGINT NOT NULL,

@@ -1,14 +1,19 @@
 -- Seed data for Kinesiología Alcarez (Tenant ID: 1)
 USE `agenda_multi_db`;
 
--- 1. Insert Category
+-- 1. Insert Categories
 INSERT INTO `categories_oficios` (`id`, `name`, `description`) 
-VALUES (1, 'Kinesiología', 'Especialidad en personas de la 3ra edad')
-ON DUPLICATE KEY UPDATE `description` = VALUES(`description`);
+VALUES 
+(1, 'Barbería', 'Servicios de barbería y corte masculino'),
+(2, 'Medicina', 'Consultas médicas, odontología y kinesiología'),
+(3, 'Veterinaria', 'Cuidado de mascotas y animales'),
+(4, 'Peluquería', 'Estilismo y peluquería unisex'),
+(5, 'Otro', 'Servicios generales y otros rubros')
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `description` = VALUES(`description`);
 
 -- 2. Insert Tenant
 INSERT INTO `tenants` (`id`, `name`, `oficio_id`, `subdomain`, `status`)
-VALUES (1, 'Kinesiología Alcarez', 1, 'alcarez', 'active')
+VALUES (1, 'Kinesiología Alcarez', 2, 'alcarez', 'active')
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `oficio_id` = VALUES(`oficio_id`), `status` = VALUES(`status`);
 
 -- 3. Insert User Auth (Optional, for admin login if needed)

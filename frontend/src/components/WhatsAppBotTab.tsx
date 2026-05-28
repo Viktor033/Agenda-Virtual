@@ -34,7 +34,7 @@ export const WhatsAppBotTab: React.FC = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Obtener tenantId activo de localStorage o fallback
-  const tenantId = localStorage.getItem('active_tenant_id') || '10';
+  const tenantId = localStorage.getItem('active_tenant_id') || '1';
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

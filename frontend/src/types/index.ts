@@ -9,6 +9,7 @@ export interface Professional {
   status?: 'active' | 'suspended';
   role?: 'specialist' | 'secretary';
   password?: string; // Nuevo: contraseña de acceso personalizada para clientes del SaaS
+  rubro?: string;
 }
 
 export interface Service {

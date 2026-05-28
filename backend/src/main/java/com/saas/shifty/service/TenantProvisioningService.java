@@ -69,6 +69,12 @@ public class TenantProvisioningService {
         } else if (oficioId == 2) { 
             createDefaultService("Consulta Diagnostica General", 30, new BigDecimal("35.00"));
             createDefaultService("Profilaxis / Limpieza Dental", 45, new BigDecimal("60.00"));
+        } else if (oficioId == 3) { 
+            createDefaultService("Consulta Clinica Mascota", 30, new BigDecimal("30.00"));
+            createDefaultService("Vacunacion Anual Sextuple", 20, new BigDecimal("25.00"));
+        } else if (oficioId == 4) { 
+            createDefaultService("Corte y Peinado Profesional", 45, new BigDecimal("20.00"));
+            createDefaultService("Lavado e Hidratacion Capilar", 25, new BigDecimal("12.00"));
         } else { 
             createDefaultService("Servicio General Inicial", 60, new BigDecimal("50.00"));
         }

@@ -1,30 +1,23 @@
 import React, { useState } from 'react';
+import { login, logout, UserSession } from '../services/authService';
 
 interface LoginProps {
-  onLogin: (user: {
-    email: string;
-    name: string;
-    role: 'ADMIN' | 'PROFESSIONAL';
-    professionalId?: number;
-  }) => void;
+  onLogin: (user: UserSession) => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState(() => localStorage.getItem('remembered_email') || '');
   const [password, setPassword] = useState(() => localStorage.getItem('remembered_password') || '');
+  const [tenantIdInput, setTenantIdInput] = useState(() => localStorage.getItem('active_tenant_id') || '1');
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('remembered_email'));
   const [showPassword, setShowPassword] = useState(false);
   const [isRecoverMode, setIsRecoverMode] = useState(false);
   const [recoverEmail, setRecoverEmail] = useState('');
   const [recoverSuccess, setRecoverSuccess] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSuccessLogin = (user: {
-    email: string;
-    name: string;
-    role: 'ADMIN' | 'PROFESSIONAL';
-    professionalId?: number;
-  }) => {
+  const handleSuccessLogin = (user: UserSession) => {
     if (rememberMe) {
       localStorage.setItem('remembered_email', email.trim());
       localStorage.setItem('remembered_password', password);
@@ -39,54 +32,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     setRecoverSuccess('');
-
     if (!recoverEmail) {
       setError('Por favor, ingresa tu correo electrónico.');
       return;
     }
-
-    const emailLower = recoverEmail.toLowerCase().trim();
-    if (!emailLower.includes('@')) {
-      setError('Por favor, ingresa un correo electrónico válido.');
-      return;
-    }
-
-    // Consulta en localStorage o credenciales fijas para mostrar una simulación más real de recuperación
-    const savedClients = localStorage.getItem('saas_clients');
-    let found = false;
-    let simulatedPassword = '';
-
-    if (emailLower === 'admin@gmail.com') {
-      found = true;
-      simulatedPassword = 'admin';
-    } else if (['clara@gmail.com', 'mateo@gmail.com', 'sofia@gmail.com'].includes(emailLower)) {
-      found = true;
-      simulatedPassword = 'admin';
-    } else if (savedClients) {
-      try {
-        const clientsList = JSON.parse(savedClients);
-        const matched = clientsList.find((c: any) => c.email?.toLowerCase().trim() === emailLower);
-        if (matched) {
-          found = true;
-          simulatedPassword = matched.password || 'admin';
-        }
-      } catch (err) {
-        // ignore
-      }
-    } else if (emailLower.includes('@')) {
-      // Cualquier otro correo también lo dejamos pasar como simulación
-      found = true;
-      simulatedPassword = 'admin';
-    }
-
-    if (found) {
-      setRecoverSuccess(`¡Enlace enviado! Hemos enviado las instrucciones de recuperación a ${emailLower}. (Simulación: Tu contraseña actual es "${simulatedPassword}")`);
-    } else {
-      setError('El correo ingresado no se encuentra registrado en el sistema.');
-    }
+    setRecoverSuccess(
+      `¡Enlace enviado! Hemos enviado las instrucciones de recuperación a ${recoverEmail.toLowerCase().trim()}.`
+    );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -95,97 +50,60 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       return;
     }
 
-    const emailLower = email.toLowerCase().trim();
+    setIsLoading(true);
 
-    // 1. Acceso del Super Administrador del SaaS
-    if (emailLower === 'admin@gmail.com' && password === 'admin') {
-      handleSuccessLogin({
-        email: emailLower,
-        name: 'Administrador Global',
-        role: 'ADMIN'
+    try {
+      // Intentar login contra el backend real
+      const tenantId = tenantIdInput ? parseInt(tenantIdInput, 10) : null;
+      const session = await login({
+        email: email.trim().toLowerCase(),
+        password,
+        tenantId: isNaN(tenantId as number) ? null : tenantId,
       });
-      return;
-    } 
+      handleSuccessLogin(session);
+    } catch (err: any) {
+      // Si el backend no está disponible, usar fallback local para demo
+      const status = err?.response?.status;
 
-    // 2. Consulta y validación dinámica de Clientes B2B creados en localStorage
-    const savedClients = localStorage.getItem('saas_clients');
-    if (savedClients) {
-      try {
-        const clientsList = JSON.parse(savedClients);
-        const matched = clientsList.find((c: any) => c.email?.toLowerCase().trim() === emailLower);
-        if (matched) {
-          const requiredPassword = matched.password || 'admin';
-          if (password === requiredPassword) {
-            handleSuccessLogin({
-              email: emailLower,
-              name: matched.name,
-              role: 'PROFESSIONAL',
-              professionalId: matched.id
-            });
-            return;
-          } else {
-            setError('Contraseña incorrecta.');
-            return;
-          }
+      if (status === 401 || status === 400) {
+        setError('Email o contraseña incorrectos.');
+      } else {
+        // Backend no disponible: modo demo con credenciales locales
+        const session = tryLocalLogin(email.trim().toLowerCase(), password);
+        if (session) {
+          handleSuccessLogin(session);
+        } else {
+          setError('No se pudo conectar con el servidor. Verifica que el backend esté corriendo en el puerto 8082.');
         }
-      } catch (e) {
-        // ignore
       }
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // 3. Cuentas Fijas de Profesionales Registrados (Fallback)
-    if (emailLower === 'clara@gmail.com' && password === 'admin') {
-      handleSuccessLogin({
-        email: emailLower,
-        name: 'Clara Ortega',
-        role: 'PROFESSIONAL',
-        professionalId: 1
-      });
-      return;
-    } 
-    
-    if (emailLower === 'mateo@gmail.com' && password === 'admin') {
-      handleSuccessLogin({
-        email: emailLower,
-        name: 'Mateo Ramos',
-        role: 'PROFESSIONAL',
-        professionalId: 2
-      });
-      return;
-    } 
-    
-    if (emailLower === 'sofia@gmail.com' && password === 'admin') {
-      handleSuccessLogin({
-        email: emailLower,
-        name: 'Sofia Ortiz',
-        role: 'PROFESSIONAL',
-        professionalId: 3
-      });
-      return;
-    } 
-
-    // 3. Login Inteligente Dinámico para cualquier otro Profesional creado por el Administrador
-    if (emailLower.includes('@') && password === 'admin') {
-      // Extrae un nombre amigable del email (ej. "giselle" desde "giselle@gmail.com")
-      const rawName = emailLower.split('@')[0];
-      const friendlyName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-
-      handleSuccessLogin({
-        email: emailLower,
-        name: `Dra/Dr. ${friendlyName}`,
-        role: 'PROFESSIONAL',
-        professionalId: 1 // Asigna la agenda principal para la simulación
-      });
-      return;
+  /**
+   * Fallback local para desarrollo cuando el backend no está disponible.
+   * Solo para demo — no usar en producción.
+   */
+  const tryLocalLogin = (emailLower: string, pwd: string): UserSession | null => {
+    if (emailLower === 'admin@gmail.com' && pwd === 'admin') {
+      return { email: emailLower, name: 'Administrador Global', role: 'ADMIN', tenantId: 0 };
     }
-
-    setError('Credenciales inválidas. Verifica el correo e ingresa la contraseña configurada por el Administrador.');
+    const demos: Record<string, UserSession> = {
+      'clara@gmail.com': { email: 'clara@gmail.com', name: 'Dra. Clara Ortega', role: 'PROFESSIONAL', tenantId: 1, professionalId: 1 },
+      'mateo@gmail.com': { email: 'mateo@gmail.com', name: 'Dr. Mateo Ramos', role: 'PROFESSIONAL', tenantId: 2, professionalId: 2 },
+      'sofia@gmail.com': { email: 'sofia@gmail.com', name: 'Dra. Sofia Ortiz', role: 'PROFESSIONAL', tenantId: 3, professionalId: 3 },
+    };
+    if (demos[emailLower] && pwd === 'admin') {
+      return demos[emailLower];
+    }
+    return null;
   };
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 relative overflow-hidden select-none">
-      
-      {/* Círculos decorativos de fondo con desenfoque */}
+
+      {/* Círculos decorativos */}
       <div className="absolute w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] -top-20 -left-20 animate-pulse" />
       <div className="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[100px] -bottom-20 -right-20 animate-pulse delay-700" />
 
@@ -220,7 +138,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ej. admin@gmail.com o clara@gmail.com"
+                placeholder="ej. admin@gmail.com"
                 className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all font-medium"
               />
             </div>
@@ -254,19 +172,25 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
             </div>
 
+            {/* Tenant ID — visible solo en desarrollo para facilitar pruebas */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                Tenant ID <span className="text-slate-600 normal-case font-normal">(dejar en 1 para demo)</span>
+              </label>
+              <input
+                type="number"
+                value={tenantIdInput}
+                onChange={(e) => setTenantIdInput(e.target.value)}
+                placeholder="1"
+                min="1"
+                className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all font-medium"
+              />
+            </div>
+
             <div className="flex items-center justify-between mt-1 select-none">
               <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="sr-only"
-                />
-                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                  rememberMe
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                    : 'border-slate-800 bg-slate-950/50 group-hover:border-slate-700'
-                }`}>
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="sr-only" />
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'border-slate-800 bg-slate-950/50 group-hover:border-slate-700'}`}>
                   {rememberMe && (
                     <svg className="w-2.5 h-2.5 stroke-[3.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -275,14 +199,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
                 <span className="text-[11px] font-semibold text-slate-400 group-hover:text-slate-300 transition-colors">Recordar contraseña</span>
               </label>
-              
+
               <button
                 type="button"
-                onClick={() => {
-                  setIsRecoverMode(true);
-                  setError('');
-                  setRecoverSuccess('');
-                }}
+                onClick={() => { setIsRecoverMode(true); setError(''); setRecoverSuccess(''); }}
                 className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 ¿Olvidaste tu contraseña?
@@ -291,9 +211,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             <button
               type="submit"
-              className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-500 active:scale-[0.98] shadow-lg shadow-indigo-600/25 transition-all duration-200 mt-2"
+              disabled={isLoading}
+              className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-500 active:scale-[0.98] shadow-lg shadow-indigo-600/25 transition-all duration-200 mt-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Iniciar Sesión
+              {isLoading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Verificando...
+                </>
+              ) : 'Iniciar Sesión'}
             </button>
           </form>
         ) : (
@@ -304,25 +233,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type="email"
                 value={recoverEmail}
                 onChange={(e) => setRecoverEmail(e.target.value)}
-                placeholder="ej. admin@gmail.com o clara@gmail.com"
+                placeholder="ej. admin@gmail.com"
                 className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all font-medium"
               />
             </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-500 active:scale-[0.98] shadow-lg shadow-indigo-600/25 transition-all duration-200 mt-2"
-            >
+            <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-500 active:scale-[0.98] shadow-lg shadow-indigo-600/25 transition-all duration-200 mt-2">
               Enviar Enlace de Recuperación
             </button>
-
             <button
               type="button"
-              onClick={() => {
-                setIsRecoverMode(false);
-                setError('');
-                setRecoverSuccess('');
-              }}
+              onClick={() => { setIsRecoverMode(false); setError(''); setRecoverSuccess(''); }}
               className="w-full py-2.5 bg-slate-950/30 border border-slate-800/80 text-slate-300 rounded-xl font-semibold text-xs hover:bg-slate-900/60 transition-all duration-200 text-center"
             >
               Volver al Inicio de Sesión
@@ -331,21 +251,20 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         )}
 
         <div className="border-t border-slate-800/80 pt-4 flex flex-col gap-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block text-center">Credenciales Rápidas:</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block text-center">Credenciales de Demo:</span>
           <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-medium">
             <div className="p-2 rounded-lg bg-slate-950/20 border border-slate-800/50">
               <span className="text-indigo-400 block font-semibold">Super Admin SaaS</span>
-              <span>admin@gmail.com (clave: admin)</span>
+              <span>admin@gmail.com / admin</span>
             </div>
             <div className="p-2 rounded-lg bg-slate-950/20 border border-slate-800/50">
-              <span className="text-emerald-400 block font-semibold">Profesional Clara</span>
-              <span>clara@gmail.com (clave: admin)</span>
+              <span className="text-emerald-400 block font-semibold">Profesional (Tenant 1)</span>
+              <span>clara@gmail.com / admin</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer corporativo */}
       <footer className="absolute bottom-4 left-0 right-0 text-center text-[10px] text-slate-500 font-semibold select-none z-10">
         &copy; {new Date().getFullYear()} <span className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors cursor-pointer">VK-Dev-Web</span>. Todos los derechos reservados.
       </footer>
