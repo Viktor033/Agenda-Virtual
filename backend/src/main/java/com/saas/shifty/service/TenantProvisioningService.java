@@ -6,6 +6,7 @@ import com.saas.shifty.repository.ServiceRepository;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 
 @org.springframework.stereotype.Service
+@Slf4j
 public class TenantProvisioningService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -51,6 +53,12 @@ public class TenantProvisioningService {
         String hashedPassword = passwordEncoder.encode(dto.getAdminPassword());
         String insertUserSql = "INSERT INTO users_auth (tenant_id, email, password_hash, role, status) VALUES (?, ?, ?, 'ADMIN', 'active')";
         jdbcTemplate.update(insertUserSql, tenantId, dto.getAdminEmail(), hashedPassword);
+
+        // Simulador de envío de correo electrónico de bienvenida
+        log.info("📧 [Email Simulator] Enviando correo de bienvenida a {}...", dto.getAdminEmail());
+        log.info("   ¡Estimado Cliente! Tu clínica '{}' ha sido creada con éxito en Shifty SaaS.", dto.getTenantName());
+        log.info("   URL de acceso: http://{}.agenda.com:8082", dto.getSubdomain());
+        log.info("   Usuario: {} | Contraseña temporal: {}", dto.getAdminEmail(), dto.getAdminPassword());
 
         try {
             TenantContext.setCurrentTenant(tenantId);
