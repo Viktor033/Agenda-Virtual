@@ -106,7 +106,12 @@ public class StripeWebhookController {
                 sub.setStripeCustomerId(stripeCustomerId);
                 sub.setStripeSubscriptionId(stripeSubscriptionId);
                 sub.setStatus("active");
-                sub.setPlanType("standard"); // Por defecto asignamos Standard, escalable a través de metadata del plan
+                
+                String planType = "standard";
+                if (session.getMetadata() != null && session.getMetadata().get("plan_type") != null) {
+                    planType = session.getMetadata().get("plan_type");
+                }
+                sub.setPlanType(planType);
                 
                 if (session.getExpiresAt() != null) {
                     sub.setCurrentPeriodEnd(LocalDateTime.ofInstant(

@@ -145,7 +145,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
             expiresAt: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
             metadata: {
               tenant_id: tenantId.toString(),
-              plan_type: 'trial'
+              plan_type: 'basic'
             }
           }
         }

@@ -78,7 +78,7 @@ public class TenantProvisioningService {
         Long adminUserId = jdbcTemplate.queryForObject(
                 "SELECT id FROM users_auth WHERE tenant_id = ? LIMIT 1", Long.class, tenantId);
         String insertSubSql = "INSERT INTO subscriptions (tenant_id, customer_id, plan_type, status, stripe_customer_id, stripe_subscription_id, current_period_end) " +
-                "VALUES (?, ?, 'trial', 'active', NULL, NULL, NULL)";
+                "VALUES (?, ?, 'basic', 'active', NULL, NULL, NULL)";
         jdbcTemplate.update(insertSubSql, tenantId, adminUserId);
         log.info("[TenantProvisioning] Suscripción TRIAL creada para tenantId={}", tenantId);
     }
