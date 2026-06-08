@@ -108,7 +108,60 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       return;
     }
     setError(null);
-    setStep(2); // Avanzar a pantalla de pago simulada de Stripe
+    
+    if (selectedPlan?.name === 'Plan Prueba') {
+      // Registrar directamente sin pasar por Stripe
+      await handlePaymentAndProvisionDirectly();
+    } else {
+      setStep(2); // Avanzar a pantalla de pago simulada de Stripe
+    }
+  };
+
+  const handlePaymentAndProvisionDirectly = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // 1. Llamar al backend real de aprovisionamiento
+      const response = await axios.post('/api/v1/provision/register', {
+        tenantName: formData.tenantName,
+        oficioId: formData.oficioId,
+        subdomain: formData.subdomain.toLowerCase().trim(),
+        adminEmail: formData.adminEmail.toLowerCase().trim(),
+        adminPassword: formData.adminPassword,
+      });
+
+      const tenantId = response.data.tenantId;
+      setCreatedTenantId(tenantId);
+
+      // 2. Simular llamada exitosa a webhook de Stripe para actualizar la suscripción activa
+      await axios.post('/api/v1/webhooks/stripe', {
+        id: "evt_test_signup_" + Date.now(),
+        type: "checkout.session.completed",
+        dataObjectDeserializer: {
+          object: {
+            customer: "cus_simulated_" + Date.now(),
+            subscription: "sub_simulated_" + Date.now(),
+            clientReferenceId: tenantId.toString(),
+            expiresAt: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
+            metadata: {
+              tenant_id: tenantId.toString(),
+              plan_type: 'trial'
+            }
+          }
+        }
+      }, {
+        headers: {
+          'Stripe-Signature': 'simulated_signature'
+        }
+      });
+
+      setStep(3); // Registro exitoso
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Error durante el registro y provisión de la clínica.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePaymentAndProvision = async () => {
