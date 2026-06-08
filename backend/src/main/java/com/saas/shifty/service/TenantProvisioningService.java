@@ -82,7 +82,6 @@ public class TenantProvisioningService {
         jdbcTemplate.update(insertSubSql, tenantId, adminUserId);
         log.info("[TenantProvisioning] Suscripción TRIAL creada para tenantId={}", tenantId);
     }
-    }
 
     private void initializeDefaultServices(int oficioId) {
         if (oficioId == 1) { 
