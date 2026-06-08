@@ -77,16 +77,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       features: [
         'Especialistas ilimitados',
         'Turnos ilimitados',
-        'Módulo de Facturación SaaS',
+          'Módulo de Facturación SaaS',
         'WhatsApp ilimitado con chatbot',
         'Soporte telefónico exclusivo',
         'Subdominio personalizado gratis',
       ],
       popular: false,
       buttonText: 'Elegir Premium',
-      color: 'violet'
-    }
-  ];
+      color: 'violet',
+    },
+    {
+      name: 'Plan Prueba',
+      tagline: 'Plan gratuito de prueba para iniciar.',
+      price: 0,
+      features: [
+        '1 Profesional',
+        'Hasta 2 turnos al mes',
+        'Historial clínico básico',
+        'Soporte por correo',
+      ],
+      popular: false,
+      buttonText: 'Comenzar Prueba',
+      color: 'gray',
+    },
+];
 
   const handlePlanClick = (planName: string, planPrice: number) => {
     setSelectedPlan({ name: planName, price: planPrice });

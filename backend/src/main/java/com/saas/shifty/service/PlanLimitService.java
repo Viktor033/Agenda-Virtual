@@ -28,8 +28,8 @@ public class PlanLimitService {
         String planType = getPlanType(tenantId);
         
         int limit = Integer.MAX_VALUE;
-        if ("basic".equalsIgnoreCase(planType)) {
-            limit = 1;
+        if ("basic".equalsIgnoreCase(planType) || "trial".equalsIgnoreCase(planType)) {
+            limit = 1; // Límite de 1 profesional para planes basic y trial
         } else if ("standard".equalsIgnoreCase(planType)) {
             limit = 5;
         }
@@ -55,6 +55,8 @@ public class PlanLimitService {
         int limit = Integer.MAX_VALUE;
         if ("basic".equalsIgnoreCase(planType)) {
             limit = 150;
+        } else if ("trial".equalsIgnoreCase(planType)) {
+            limit = 2; // Límite de 2 turnos para el plan trial
         }
 
         // Obtener el inicio y fin del mes actual
