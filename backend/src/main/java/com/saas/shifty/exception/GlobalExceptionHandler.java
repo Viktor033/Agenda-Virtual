@@ -88,11 +88,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex, HttpServletRequest request) {
+        ex.printStackTrace(); // Imprime el error real en la consola/Git Bash
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error("Error Interno del Servidor")
-                .message("Ha ocurrido un error inesperado en el servidor.")
+                .message("Ha ocurrido un error inesperado en el servidor: " + ex.getMessage())
                 .path(request.getRequestURI())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
