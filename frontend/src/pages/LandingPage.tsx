@@ -33,8 +33,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
   const categories = [
     { id: 1, name: 'Barbería' },
     { id: 2, name: 'Odontología' },
-    { id: 3, name: 'Veterinaria' },
-    { id: 4, name: 'Peluquería / Estética' },
+    { id: 3, name: 'Psicología' },
+    { id: 4, name: 'Kinesiología' },
     { id: 5, name: 'Medicina General' }
   ];
 

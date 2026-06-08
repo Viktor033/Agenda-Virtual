@@ -91,11 +91,11 @@ public class TenantProvisioningService {
             createDefaultService("Consulta Diagnostica General", 30, new BigDecimal("35.00"));
             createDefaultService("Profilaxis / Limpieza Dental", 45, new BigDecimal("60.00"));
         } else if (oficioId == 3) { 
-            createDefaultService("Consulta Clinica Mascota", 30, new BigDecimal("30.00"));
-            createDefaultService("Vacunacion Anual Sextuple", 20, new BigDecimal("25.00"));
+            createDefaultService("Sesión de Terapia Individual", 50, new BigDecimal("40.00"));
+            createDefaultService("Evaluación Psicológica", 60, new BigDecimal("55.00"));
         } else if (oficioId == 4) { 
-            createDefaultService("Corte y Peinado Profesional", 45, new BigDecimal("20.00"));
-            createDefaultService("Lavado e Hidratacion Capilar", 25, new BigDecimal("12.00"));
+            createDefaultService("Sesión de Kinesiología Motora", 45, new BigDecimal("30.00"));
+            createDefaultService("Rehabilitación Física Estándar", 50, new BigDecimal("35.00"));
         } else { 
             createDefaultService("Servicio General Inicial", 60, new BigDecimal("50.00"));
         }
