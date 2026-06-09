@@ -158,7 +158,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       setStep(3); // Registro exitoso
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || 'Error durante el registro y provisión de la clínica.');
+      // Obtener el mensaje específico del backend si viene en la respuesta HTTP
+      const backendError = err.response?.data?.message || err.response?.data || err.message;
+      setError('Error durante el registro: ' + backendError);
     } finally {
       setLoading(false);
     }
