@@ -75,11 +75,9 @@ public class TenantProvisioningService {
     /** Crea una suscripción de prueba (plan TRIAL) para el tenant */
     private void createTrialSubscription(Long tenantId, TenantRegistrationDto dto) {
         // Obtener el id del usuario admin creado (el primero que pertenece al tenant)
-        Long adminUserId = jdbcTemplate.queryForObject(
-                "SELECT id FROM users_auth WHERE tenant_id = ? LIMIT 1", Long.class, tenantId);
-        String insertSubSql = "INSERT INTO subscriptions (tenant_id, customer_id, plan_type, status, stripe_customer_id, stripe_subscription_id, current_period_end) " +
-                "VALUES (?, ?, 'basic', 'active', NULL, NULL, NULL)";
-        jdbcTemplate.update(insertSubSql, tenantId, adminUserId);
+        String insertSubSql = "INSERT INTO subscriptions (tenant_id, plan_type, status, stripe_customer_id, stripe_subscription_id, current_period_end) " +
+                "VALUES (?, 'basic', 'active', NULL, NULL, NULL)";
+        jdbcTemplate.update(insertSubSql, tenantId);
         log.info("[TenantProvisioning] Suscripción TRIAL creada para tenantId={}", tenantId);
     }
 
