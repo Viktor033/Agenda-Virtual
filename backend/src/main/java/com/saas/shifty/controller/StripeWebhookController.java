@@ -74,8 +74,9 @@ public class StripeWebhookController {
                     break;
             }
         } catch (Exception e) {
+            e.printStackTrace(); // Imprime la excepción real de la base de datos en Git Bash
             log.error("Error procesando el evento {}: {}", event.getType(), e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de procesamiento interno");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de procesamiento interno: " + e.getMessage());
         }
 
         return ResponseEntity.ok("Evento procesado correctamente");
