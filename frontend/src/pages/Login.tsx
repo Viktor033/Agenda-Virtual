@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { login, logout, UserSession } from '../services/authService';
+import { login, UserSession } from '../services/authService';
 
 interface LoginProps {
   onLogin: (user: UserSession) => void;

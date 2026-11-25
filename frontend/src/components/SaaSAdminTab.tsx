@@ -196,20 +196,20 @@ export const SaaSAdminTab: React.FC = () => {
     <div className="flex flex-col gap-6 animate-fade-in font-sans pb-10">
       
       {/* 📊 TARJETAS DE MÉTRICAS FINANCIERAS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">SaaS MRR (Ingreso Mensual)</span>
-          <div className="flex items-baseline gap-1 mt-3">
-            <span className="text-2xl font-extrabold text-slate-800">${totalMRR.toFixed(2)}</span>
+          <div className="flex items-baseline gap-1 mt-2 sm:mt-3">
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-800">${totalMRR.toFixed(2)}</span>
             <span className="text-xs font-semibold text-slate-400">USD</span>
           </div>
           <span className="text-[10px] text-emerald-500 font-bold mt-2 block">✓ {activeTenantsCount} Inquilinos Activos</span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Cobrado este Mes</span>
-          <div className="flex items-baseline gap-1 mt-3">
-            <span className="text-2xl font-extrabold text-emerald-600">${paidRevenue.toFixed(2)}</span>
+          <div className="flex items-baseline gap-1 mt-2 sm:mt-3">
+            <span className="text-xl sm:text-2xl font-extrabold text-emerald-600">${paidRevenue.toFixed(2)}</span>
             <span className="text-xs font-semibold text-slate-400">USD</span>
           </div>
           <span className="text-[10px] text-slate-400 font-medium mt-2 block">
@@ -217,19 +217,19 @@ export const SaaSAdminTab: React.FC = () => {
           </span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Pendiente de Cobro</span>
-          <div className="flex items-baseline gap-1 mt-3">
-            <span className="text-2xl font-extrabold text-amber-500">${pendingRevenue.toFixed(2)}</span>
+          <div className="flex items-baseline gap-1 mt-2 sm:mt-3">
+            <span className="text-xl sm:text-2xl font-extrabold text-amber-500">${pendingRevenue.toFixed(2)}</span>
             <span className="text-xs font-semibold text-slate-400">USD</span>
           </div>
           <span className="text-[10px] text-slate-400 font-medium mt-2 block">Avisos mensuales enviados</span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Atrasados / Vencidos</span>
-          <div className="flex items-baseline gap-1 mt-3">
-            <span className="text-2xl font-extrabold text-rose-500">${unpaidRevenue.toFixed(2)}</span>
+          <div className="flex items-baseline gap-1 mt-2 sm:mt-3">
+            <span className="text-xl sm:text-2xl font-extrabold text-rose-500">${unpaidRevenue.toFixed(2)}</span>
             <span className="text-xs font-semibold text-slate-400">USD</span>
           </div>
           <span className="text-[10px] text-rose-500 font-bold mt-2 block">⚠️ Requieren Suspensión</span>
@@ -238,7 +238,7 @@ export const SaaSAdminTab: React.FC = () => {
 
       {/* 📋 LISTADO DE CLIENTES SUSCRIPTORES */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-bold text-slate-800">Control de Inquilinos y Facturación (SaaS)</h2>
             <p className="text-xs text-slate-500 mt-0.5">Controla las suscripciones de los clientes de salud y estética registrados en el sistema</p>
@@ -246,14 +246,14 @@ export const SaaSAdminTab: React.FC = () => {
           
           <button
             onClick={handleOpenAddModal}
-            className="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors shadow-sm"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors shadow-sm shrink-0"
           >
             + Registrar Cliente
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[780px] text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="py-4 px-6">Identificador / Empresa</th>
@@ -356,11 +356,11 @@ export const SaaSAdminTab: React.FC = () => {
       {/*   MODAL DE EDICIÓN / REGISTRO COMERCIAL    */}
       {/* ========================================== */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white w-full max-w-md max-h-[90dvh] rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col">
             
             {/* Cabecera */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
               <div>
                 <h3 className="text-base font-bold text-slate-800">
                   {selectedTenantToEdit ? 'Modificar Registro de Cobro' : 'Nuevo Cliente de Suscripción'}
@@ -378,7 +378,7 @@ export const SaaSAdminTab: React.FC = () => {
             </div>
 
             {/* Formulario */}
-            <form onSubmit={handleSubmitForm} className="p-6 flex flex-col gap-4">
+            <form onSubmit={handleSubmitForm} className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto">
               
               {/* Razón Social */}
               <div>
@@ -438,7 +438,7 @@ export const SaaSAdminTab: React.FC = () => {
               )}
 
               {/* Grid Plan y Precio */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Plan Comercial</label>
                   <select

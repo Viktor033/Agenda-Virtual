@@ -57,12 +57,12 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white w-full max-w-md rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100 font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white w-full max-w-md max-h-[92dvh] rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100 font-sans">
         
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">
               {serviceToEdit ? 'Editar Servicio' : 'Registrar Servicio'}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -79,7 +79,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 overflow-y-auto">
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nombre del Servicio</label>
             <input
@@ -92,7 +92,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Duración (Minutos)</label>
               <input
@@ -118,17 +118,17 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3 justify-end mt-4 border-t border-slate-100 pt-5">
+          <div className="flex gap-3 justify-end mt-2 sm:mt-4 border-t border-slate-100 pt-4 sm:pt-5">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors"
+              className="flex-1 sm:flex-none px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 shadow-md hover:shadow-indigo-500/10 transition-all"
+              className="flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 shadow-md hover:shadow-indigo-500/10 transition-all"
             >
               {serviceToEdit ? 'Actualizar Servicio' : 'Guardar Servicio'}
             </button>

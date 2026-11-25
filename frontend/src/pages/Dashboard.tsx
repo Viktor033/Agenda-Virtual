@@ -143,7 +143,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           name: p.name,
           email: p.email,
           phone: p.phone,
-          status: p.status,
+          status: (p.status === 'suspended' ? 'suspended' : 'active') as 'active' | 'suspended',
           role: 'specialist' as const,
           specialty: 'Especialista',
           color: ['indigo', 'emerald', 'violet', 'amber', 'rose'][idx % 5],

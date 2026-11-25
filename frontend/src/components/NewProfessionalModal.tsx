@@ -85,13 +85,13 @@ export const NewProfessionalModal: React.FC<NewProfessionalModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
-      <div className="bg-white w-full max-w-md rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="bg-white w-full max-w-md max-h-[92dvh] rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
         
         {/* Cabecera */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">
               {professionalToEdit ? 'Modificar Miembro' : 'Agregar al Equipo'}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5 animate-pulse-slow">
@@ -109,7 +109,7 @@ export const NewProfessionalModal: React.FC<NewProfessionalModalProps> = ({
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto max-h-[500px]">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto flex-1">
           
           {/* Carga de Imagen de Perfil (Fidelity UX) */}
           <div className="flex flex-col items-center gap-2 select-none pt-1">

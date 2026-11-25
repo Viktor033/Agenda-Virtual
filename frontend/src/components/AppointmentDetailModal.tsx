@@ -52,11 +52,11 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
-      <div className="bg-white w-full max-w-md rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="bg-white w-full max-w-md max-h-[92dvh] rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
         
         {/* Cabecera del Modal */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
             <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <span>Detalles de la Reserva</span>
@@ -78,7 +78,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
         </div>
 
         {/* Contenido / Información de la Cita */}
-        <div className="p-6 flex flex-col gap-5 overflow-y-auto max-h-[450px]">
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 overflow-y-auto flex-1">
           
           {/* Bloque 1: Estado del Turno */}
           <div className="flex justify-between items-center bg-slate-50 border border-slate-200/60 p-3 rounded-xl">
@@ -174,7 +174,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
         </div>
 
         {/* Botonera de Acciones Rápidas */}
-        <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex gap-3 select-none shrink-0">
+        <div className="p-4 sm:p-5 bg-slate-50/50 border-t border-slate-100 flex flex-wrap gap-2 sm:gap-3 select-none shrink-0">
           {appointment.status !== 'cancelled' && (
             <button
               type="button"

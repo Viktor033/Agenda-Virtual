@@ -14,7 +14,6 @@ export const ProfessionalsTab: React.FC<ProfessionalsTabProps> = ({
   onOpenAddModal,
   onEditProfessional,
   onDeleteProfessional,
-  userRole,
 }) => {
   const specialists = professionals.filter(p => p.role !== 'secretary');
   const secretaries = professionals.filter(p => p.role === 'secretary');

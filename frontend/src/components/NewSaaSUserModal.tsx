@@ -110,11 +110,11 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
-      <div className="bg-white w-full max-w-md rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
+      <div className="bg-white w-full max-w-md max-h-[92dvh] rounded-2xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col transform transition-all duration-300 scale-100">
         
         {/* Cabecera */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
             <h3 className="text-base font-bold text-slate-800">
               {userToEdit ? 'Configurar Cuenta de Cliente' : 'Dar de Alta Nuevo Cliente'}
@@ -133,7 +133,7 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="p-6 flex flex-col gap-4 overflow-y-auto max-h-[400px]">
+          <div className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto flex-1">
             
             {/* Nombre */}
             <div>
@@ -217,7 +217,7 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Plan de cobro */}
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Plan SaaS</label>
@@ -276,7 +276,7 @@ export const NewSaaSUserModal: React.FC<NewSaaSUserModalProps> = ({
           </div>
 
           {/* Botones de pie */}
-          <div className="p-5 bg-slate-50/50 border-t border-slate-100 flex gap-3 select-none">
+          <div className="p-4 sm:p-5 bg-slate-50/50 border-t border-slate-100 flex gap-3 select-none shrink-0">
             <button
               type="button"
               onClick={onClose}

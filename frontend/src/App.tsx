@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -14,7 +14,7 @@ function App() {
     setView('landing');
   };
 
-  const handleRegisterSuccess = (email: string, tenantId: number) => {
+  const handleRegisterSuccess = (_email: string, tenantId: number) => {
     localStorage.setItem('active_tenant_id', tenantId.toString());
     setView('login');
   };
