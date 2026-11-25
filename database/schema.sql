@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
     `id` BIGINT AUTO_INCREMENT NOT NULL,
     `stripe_customer_id` VARCHAR(255) NULL,
     `stripe_subscription_id` VARCHAR(255) NULL,
-    `plan_type` ENUM('basic', 'standard', 'premium') NOT NULL DEFAULT 'basic',
+    `plan_type` VARCHAR(50) NOT NULL DEFAULT 'basic',
     `status` VARCHAR(50) NOT NULL DEFAULT 'incomplete',
     `current_period_end` TIMESTAMP NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -45,20 +45,20 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     <div className="flex flex-col gap-6 animate-fade-in font-sans pb-10">
       
       {/* SECCIÓN 1: IDENTIDAD VISUAL */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-5">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Identidad Visual y Temas</h2>
+          <h2 className="text-base sm:text-lg font-bold text-slate-800">Identidad Visual y Temas</h2>
           <p className="text-xs text-slate-500 mt-0.5">Elige el color principal de la marca para personalizar toda tu interfaz</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mt-1 sm:mt-2">
           {colors.map((c) => {
             const isActive = themeColor === c.id;
             return (
               <button
                 key={c.id}
                 onClick={() => setThemeColor(c.id)}
-                className={`p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all duration-200 ${
+                className={`p-3.5 sm:p-4 rounded-2xl border flex flex-col items-center gap-2.5 sm:gap-3 transition-all duration-200 ${
                   isActive 
                     ? 'border-slate-300 bg-slate-50 shadow-md scale-102 ring-4 ring-offset-1 ' + c.ring
                     : 'border-slate-100 bg-white hover:bg-slate-50/50'
@@ -71,7 +71,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     </svg>
                   )}
                 </div>
-                <span className="text-xs font-bold text-slate-700">{c.label}</span>
+                <span className="text-xs font-bold text-slate-700 text-center">{c.label}</span>
               </button>
             );
           })}
@@ -79,13 +79,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       {/* SECCIÓN 2: INFORMACIÓN DE LA AGENDA */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-5">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Ficha y Perfil Comercial</h2>
+          <h2 className="text-base sm:text-lg font-bold text-slate-800">Ficha y Perfil Comercial</h2>
           <p className="text-xs text-slate-500 mt-0.5">Modifica los datos que se muestran en el Sidebar y notificaciones</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mt-1 sm:mt-2">
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nombre Comercial</label>
             <input
@@ -117,23 +117,23 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       {/* SECCIÓN 3: PARÁMETROS OPERATIVOS */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-6">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-5 sm:gap-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Parámetros Operativos de Turnos</h2>
+          <h2 className="text-base sm:text-lg font-bold text-slate-800">Parámetros Operativos de Turnos</h2>
           <p className="text-xs text-slate-500 mt-0.5">Controla los días laborales de la agenda y sus rangos horarios</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-1 sm:mt-2">
           {/* Checkboxes de días */}
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3.5">Días Laborales Habilitados</label>
-            <div className="flex flex-wrap gap-2.5">
+            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Días Laborales Habilitados</label>
+            <div className="flex flex-wrap gap-2">
               {(Object.keys(workDays) as Array<keyof typeof workDays>).map((day) => {
                 const isSelected = workDays[day];
                 let activeBg = 'bg-indigo-600 text-white';
                 if (themeColor === 'emerald') activeBg = 'bg-emerald-600 text-white';
                 if (themeColor === 'violet') activeBg = 'bg-violet-600 text-white';
-                if (themeColor === 'amber') activeBg = 'bg-amber-50 text-white';
+                if (themeColor === 'amber') activeBg = 'bg-amber-500 text-white';
                 if (themeColor === 'rose') activeBg = 'bg-rose-600 text-white';
 
                 return (
@@ -141,7 +141,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     key={day}
                     type="button"
                     onClick={() => handleDayToggle(day)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all duration-150 border ${
+                    className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all duration-150 border ${
                       isSelected 
                         ? activeBg + ' border-transparent shadow-sm scale-102'
                         : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
@@ -155,7 +155,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
 
           {/* Rango Horario */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Hora Apertura</label>
               <select

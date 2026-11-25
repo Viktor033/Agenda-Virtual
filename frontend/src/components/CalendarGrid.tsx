@@ -108,19 +108,19 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   };
 
   return (
-    <div className="flex-1 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden font-sans select-none">
+    <div className="flex-1 min-h-[480px] bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden font-sans select-none">
       
       {/* CABECERA INTERNA DEL CALENDARIO: SELECTORES */}
-      <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 justify-between items-center shrink-0">
+      <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center shrink-0">
         
         {/* Selector de Profesional en Vista Semanal */}
         {viewMode === 'week' ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ver agenda de:</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider shrink-0">Ver agenda de:</span>
             <select
               value={selectedProfId}
               onChange={(e) => setSelectedProfId(Number(e.target.value))}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full sm:w-auto px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
               {professionals.map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.specialty})</option>
@@ -128,16 +128,16 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             </select>
           </div>
         ) : (
-          <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+          <div className="text-[11px] sm:text-xs text-slate-400 font-semibold uppercase tracking-wider text-center sm:text-left">
             {viewMode === 'day' ? 'Agenda diaria por recursos' : 'Consolidado mensual de turnos'}
           </div>
         )}
 
         {/* Botones de alternancia de Vistas (Día, Semana, Mes) */}
-        <div className="flex bg-slate-200/60 p-1 rounded-xl gap-0.5 self-end">
+        <div className="grid grid-cols-3 sm:flex bg-slate-200/60 p-1 rounded-xl gap-0.5 w-full sm:w-auto">
           <button
             onClick={() => setViewMode('day')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'day' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -145,7 +145,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           </button>
           <button
             onClick={() => setViewMode('week')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'week' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -153,7 +153,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           </button>
           <button
             onClick={() => setViewMode('month')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'month' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -171,17 +171,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           {/* CABECERA DIARIA DE MEDICOS */}
           <div className="flex border-b border-slate-100 bg-slate-50/20 shrink-0">
             {/* Espacio para alinear con columna fija de horas */}
-            <div className="w-16 md:w-20 border-r border-slate-100 shrink-0" />
+            <div className="w-14 sm:w-16 md:w-20 border-r border-slate-100 shrink-0" />
             
             {/* Listado de doctores (Desplazable en móvil) */}
             <div className="flex-1 overflow-hidden" id="calendar-header-scroll-day">
-              <div className="min-w-[550px] md:min-w-0 grid" style={{ gridTemplateColumns: `repeat(${professionals.length}, minmax(0, 1fr))` }}>
+              <div className="grid" style={{ minWidth: `${Math.max(professionals.length * 145, 280)}px`, gridTemplateColumns: `repeat(${professionals.length}, minmax(0, 1fr))` }}>
                 {professionals.map((prof) => (
-                  <div key={prof.id} className="py-4 px-2 flex flex-col items-center gap-1.5 border-r border-slate-100 last:border-r-0">
+                  <div key={prof.id} className="py-3 sm:py-4 px-2 flex flex-col items-center gap-1.5 border-r border-slate-100 last:border-r-0">
                     <img
                       src={prof.avatar}
                       alt={prof.name}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-white ring-2 ring-indigo-500/20"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-white ring-2 ring-indigo-500/20"
                     />
                     <div className="text-center overflow-hidden w-full px-1">
                       <h3 className="font-bold text-slate-800 text-[10px] md:text-xs truncate">{prof.name}</h3>
@@ -197,9 +197,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           <div className="flex-1 flex overflow-hidden">
             
             {/* Eje de Horas Fijo a la Izquierda */}
-            <div className="w-16 md:w-20 border-r border-slate-100 bg-slate-50/10 shrink-0 select-none overflow-y-hidden" id="calendar-hours-scroll-day">
+            <div className="w-14 sm:w-16 md:w-20 border-r border-slate-100 bg-slate-50/10 shrink-0 select-none overflow-y-hidden" id="calendar-hours-scroll-day">
               {hours.map((hour) => (
-                <div key={hour} className="h-16 border-b border-slate-100/60 pr-2.5 flex items-start justify-end text-[9px] md:text-[10px] font-bold text-slate-400 pt-1">
+                <div key={hour} className="h-16 border-b border-slate-100/60 pr-2 sm:pr-2.5 flex items-start justify-end text-[9px] md:text-[10px] font-bold text-slate-400 pt-1">
                   {hour.toString().padStart(2, '0')}:00
                 </div>
               ))}
@@ -219,7 +219,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                 if (hoursScroll) hoursScroll.scrollTop = scrollTopVal;
               }}
             >
-              <div className="min-w-[550px] md:min-w-0 grid relative" style={{ gridTemplateColumns: `repeat(${professionals.length}, minmax(0, 1fr))` }}>
+              <div className="grid relative" style={{ minWidth: `${Math.max(professionals.length * 145, 280)}px`, gridTemplateColumns: `repeat(${professionals.length}, minmax(0, 1fr))` }}>
                 {professionals.map((prof) => (
                   <div key={prof.id} className="relative border-r border-slate-100 last:border-r-0">
                     {hours.map((hour) => (
@@ -272,17 +272,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           
           {/* CABECERA DIARIA DE LA SEMANA */}
           <div className="flex border-b border-slate-100 bg-slate-50/20 shrink-0">
-            <div className="w-16 md:w-20 border-r border-slate-100 shrink-0" />
+            <div className="w-14 sm:w-16 md:w-20 border-r border-slate-100 shrink-0" />
             
             <div className="flex-1 overflow-hidden" id="calendar-header-scroll-week">
-              <div className="min-w-[650px] md:min-w-0 grid grid-cols-7">
+              <div className="min-w-[630px] md:min-w-0 grid grid-cols-7">
                 {weekDates.map((dateItem, idx) => {
                   const isSelectedDay = isSameDay(dateItem, selectedDate);
                   const isTodayDate = isSameDay(dateItem, new Date());
                   return (
-                    <div key={idx} className={`py-3 px-1 flex flex-col items-center gap-1 border-r border-slate-100 last:border-r-0 select-none ${isSelectedDay ? 'bg-indigo-50/20' : ''}`}>
+                    <div key={idx} className={`py-2.5 sm:py-3 px-1 flex flex-col items-center gap-1 border-r border-slate-100 last:border-r-0 select-none ${isSelectedDay ? 'bg-indigo-50/20' : ''}`}>
                       <span className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">{weekDaysLabels[idx]}</span>
-                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                      <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                         isTodayDate ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-800'
                       }`}>
                         {dateItem.getDate()}
@@ -298,9 +298,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           <div className="flex-1 flex overflow-hidden">
             
             {/* Eje de Horas Fijo */}
-            <div className="w-16 md:w-20 border-r border-slate-100 bg-slate-50/10 shrink-0 select-none overflow-y-hidden" id="calendar-hours-scroll-week">
+            <div className="w-14 sm:w-16 md:w-20 border-r border-slate-100 bg-slate-50/10 shrink-0 select-none overflow-y-hidden" id="calendar-hours-scroll-week">
               {hours.map((hour) => (
-                <div key={hour} className="h-16 border-b border-slate-100/60 pr-2.5 flex items-start justify-end text-[9px] md:text-[10px] font-bold text-slate-400 pt-1">
+                <div key={hour} className="h-16 border-b border-slate-100/60 pr-2 sm:pr-2.5 flex items-start justify-end text-[9px] md:text-[10px] font-bold text-slate-400 pt-1">
                   {hour.toString().padStart(2, '0')}:00
                 </div>
               ))}
@@ -320,7 +320,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                 if (hoursScroll) hoursScroll.scrollTop = scrollTopVal;
               }}
             >
-              <div className="min-w-[650px] md:min-w-0 grid grid-cols-7 relative">
+              <div className="min-w-[630px] md:min-w-0 grid grid-cols-7 relative">
                 {weekDates.map((dateItem, colIdx) => (
                   <div key={colIdx} className="relative border-r border-slate-100 last:border-r-0">
                     {hours.map((hour) => (
@@ -364,8 +364,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       {/* 3. MODO DE RENDERIZACIÓN: MES (CUADRÍCULA DE PARED) RESPONSIVO */}
       {/* ============================================================== */}
       {viewMode === 'month' && (
-        <div className="flex flex-col flex-1 overflow-x-auto">
-          <div className="min-w-[650px] md:min-w-0 flex flex-col flex-1">
+        <div className="flex flex-col flex-1 overflow-auto">
+          <div className="min-w-[560px] md:min-w-0 flex flex-col flex-1">
             
             {/* Cabecera de días de la semana */}
             <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/20 text-center shrink-0">
@@ -377,7 +377,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             </div>
 
             {/* Grilla mensual de 42 celdas */}
-            <div className="flex-1 grid grid-cols-7 grid-rows-6 border-b border-slate-100 h-[500px] md:h-[580px]">
+            <div className="flex-1 grid grid-cols-7 grid-rows-6 border-b border-slate-100 min-h-[440px] md:min-h-[540px]">
               {monthGridDays.map((dateItem, cellIdx) => {
                 const isCurrentMonth = dateItem.getMonth() === currentMonthActive;
                 const isTodayDate = isSameDay(dateItem, new Date());

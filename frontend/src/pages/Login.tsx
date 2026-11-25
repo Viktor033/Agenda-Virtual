@@ -101,18 +101,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 relative overflow-hidden select-none">
+    <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-16 pb-10 sm:py-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 relative overflow-x-hidden overflow-y-auto select-none">
 
       {/* Círculos decorativos */}
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] -top-20 -left-20 animate-pulse" />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[100px] -bottom-20 -right-20 animate-pulse delay-700" />
+      <div className="absolute w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] rounded-full bg-indigo-500/10 blur-[100px] -top-20 -left-20 animate-pulse pointer-events-none" />
+      <div className="absolute w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] rounded-full bg-violet-500/10 blur-[100px] -bottom-20 -right-20 animate-pulse delay-700 pointer-events-none" />
 
-      <div className="w-full max-w-md p-8 bg-slate-900/40 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col gap-6 animate-fade-in relative z-10">
-        <div className="flex flex-col items-center gap-2.5">
+      <div className="w-full max-w-md p-6 sm:p-8 bg-slate-900/40 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col gap-5 sm:gap-6 animate-fade-in relative z-10 my-auto">
+        <div className="flex flex-col items-center gap-2 text-center">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center font-bold text-xl text-white shadow-xl shadow-indigo-500/20">
             S
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight mt-2">SaaS Agenda Multi</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1">SaaS Agenda Multi</h2>
           <p className="text-xs text-slate-400">
             {isRecoverMode ? 'Recuperación de credenciales' : 'Ingreso unificado para Super Admin y Profesionales'}
           </p>
@@ -187,7 +187,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               />
             </div>
 
-            <div className="flex items-center justify-between mt-1 select-none">
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-1 select-none">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="sr-only" />
                 <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'border-slate-800 bg-slate-950/50 group-hover:border-slate-700'}`}>
@@ -252,12 +252,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         <div className="border-t border-slate-800/80 pt-4 flex flex-col gap-2">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block text-center">Credenciales de Demo:</span>
-          <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-medium">
-            <div className="p-2 rounded-lg bg-slate-950/20 border border-slate-800/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-slate-400 font-medium">
+            <div className="p-2.5 rounded-lg bg-slate-950/20 border border-slate-800/50">
               <span className="text-indigo-400 block font-semibold">Super Admin SaaS</span>
               <span>admin@gmail.com / admin</span>
             </div>
-            <div className="p-2 rounded-lg bg-slate-950/20 border border-slate-800/50">
+            <div className="p-2.5 rounded-lg bg-slate-950/20 border border-slate-800/50">
               <span className="text-emerald-400 block font-semibold">Profesional (Tenant 1)</span>
               <span>clara@gmail.com / admin</span>
             </div>
@@ -265,7 +265,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </div>
       </div>
 
-      <footer className="absolute bottom-4 left-0 right-0 text-center text-[10px] text-slate-500 font-semibold select-none z-10">
+      <footer className="mt-6 text-center text-[10px] text-slate-500 font-semibold select-none z-10">
         &copy; {new Date().getFullYear()} <span className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors cursor-pointer">VK-Dev-Web</span>. Todos los derechos reservados.
       </footer>
     </div>

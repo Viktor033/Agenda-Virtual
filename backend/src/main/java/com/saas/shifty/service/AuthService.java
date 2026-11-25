@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class AuthService {
     private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final JdbcTemplate jdbcTemplate;
 
     // DTO de entrada
     @Getter
@@ -41,13 +43,15 @@ public class AuthService {
         private final String role;
         private final Long tenantId;
         private final long expiresIn;
+        private final String planType;
 
-        public LoginResponse(String token, String email, String role, Long tenantId, long expiresIn) {
+        public LoginResponse(String token, String email, String role, Long tenantId, long expiresIn, String planType) {
             this.token = token;
             this.email = email;
             this.role = role;
             this.tenantId = tenantId;
             this.expiresIn = expiresIn;
+            this.planType = planType;
         }
     }
 
@@ -64,10 +68,22 @@ public class AuthService {
         String role   = user.getRole();
         String token  = jwtUtil.generateToken(user.getEmail(), tenantId, role);
 
-        log.info("Login exitoso - Usuario: {}, Tenant: {}, Rol: {}", user.getEmail(), tenantId, role);
+        String planType = "basic";
+        try {
+            planType = jdbcTemplate.queryForObject(
+                    "SELECT plan_type FROM subscriptions WHERE tenant_id = ? AND status = 'active' LIMIT 1", 
+                    String.class, 
+                    tenantId
+            );
+            if (planType == null) planType = "basic";
+        } catch (Exception e) {
+            planType = "basic";
+        }
+
+        log.info("Login exitoso - Usuario: {}, Tenant: {}, Rol: {}, Plan: {}", user.getEmail(), tenantId, role, planType);
 
         // expiresIn en segundos para el cliente
-        return new LoginResponse(token, user.getEmail(), role, tenantId, 86400L);
+        return new LoginResponse(token, user.getEmail(), role, tenantId, 86400L, planType);
     }
 
     private UserAuth findUser(LoginRequest request) {

@@ -21,6 +21,7 @@ import { UserSession } from '../services/authService';
 import * as patientService from '../services/patientService';
 import * as serviceService from '../services/serviceService';
 import * as appointmentService from '../services/appointmentService';
+import * as professionalService from '../services/professionalService';
 
 interface DashboardProps {
   user: UserSession;
@@ -127,14 +128,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
     const loadData = async () => {
       try {
-        const [fetchedPatients, fetchedServices, fetchedAppointments] = await Promise.all([
+        const [fetchedPatients, fetchedServices, fetchedAppointments, fetchedProfessionals] = await Promise.all([
           patientService.getPatients(),
           serviceService.getServices(),
           appointmentService.getAppointments(),
+          professionalService.getProfessionals(),
         ]);
         setPatients(fetchedPatients);
         setServices(fetchedServices);
         setAppointments(fetchedAppointments);
+        
+        const mappedProfs = fetchedProfessionals.map((p, idx) => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          phone: p.phone,
+          status: p.status,
+          role: 'specialist' as const,
+          specialty: 'Especialista',
+          color: ['indigo', 'emerald', 'violet', 'amber', 'rose'][idx % 5],
+          avatar: `https://images.unsplash.com/photo-1594824813573-246434e33963?w=100&h=100&fit=crop`
+        }));
+        if (mappedProfs.length > 0) {
+          setAllProfessionals(mappedProfs);
+        }
       } catch {
         // Backend no disponible: los estados ya tienen datos de demo como fallback
         console.warn('Backend no disponible. Usando datos de demo locales.');
@@ -235,7 +252,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   };
 
   // Creación y Edición del Personal de la Clínica (Profesionales o Secretarios/as)
-  const handleCreateOrUpdateProfessional = (data: {
+  const handleCreateOrUpdateProfessional = async (data: {
     id?: number;
     name: string;
     specialty: string;
@@ -243,59 +260,77 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     role: 'specialist' | 'secretary';
     avatar?: string; // foto de perfil cargada en Base64
   }) => {
-    if (data.id) {
-      // Modificar Personal Existente
-      setAllProfessionals(allProfessionals.map(p => p.id === data.id
-        ? { 
-            ...p, 
-            name: data.name, 
-            specialty: data.specialty, 
-            color: data.role === 'secretary' ? 'slate' : data.color, 
-            role: data.role,
-            avatar: data.avatar || p.avatar // usar avatar nuevo si se cargó, sino mantener el anterior
-          }
-        : p
-      ));
-      setSuccessTitle('¡Ficha Actualizada!');
-      setSuccessMessage(`Los datos de "${data.name}" fueron guardados correctamente.`);
-    } else {
-      // Registrar Nuevo Personal
-      const avatars = data.role === 'secretary'
-        ? [
-            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop', // Secretaria 1
-            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop', // Secretaria 2
-            'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop'  // Secretario 1
-          ]
-        : [
-            'https://images.unsplash.com/photo-1594824813573-246434e33963?w=150&h=150&fit=crop',
-            'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&h=150&fit=crop',
-            'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop'
-          ];
-      const randomAvatar = avatars[allProfessionals.length % avatars.length];
+    try {
+      if (data.id) {
+        // Modificar Personal Existente
+        await professionalService.updateProfessional(data.id, {
+          name: data.name,
+          email: `${data.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+          status: 'active'
+        });
+        setAllProfessionals(allProfessionals.map(p => p.id === data.id
+          ? { 
+              ...p, 
+              name: data.name, 
+              specialty: data.specialty, 
+              color: data.role === 'secretary' ? 'slate' : data.color, 
+              role: data.role,
+              avatar: data.avatar || p.avatar // usar avatar nuevo si se cargó, sino mantener el anterior
+            }
+          : p
+        ));
+        setSuccessTitle('¡Ficha Actualizada!');
+        setSuccessMessage(`Los datos de "${data.name}" fueron guardados correctamente.`);
+      } else {
+        // Registrar Nuevo Personal
+        const created = await professionalService.createProfessional({
+          name: data.name,
+          email: `${data.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+          phone: '+54 9 11 1234-5678',
+          status: 'active'
+        });
+        
+        const avatars = data.role === 'secretary'
+          ? [
+              'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop', // Secretaria 1
+              'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop', // Secretaria 2
+              'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop'  // Secretario 1
+            ]
+          : [
+              'https://images.unsplash.com/photo-1594824813573-246434e33963?w=150&h=150&fit=crop',
+              'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&h=150&fit=crop',
+              'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop'
+            ];
+        const randomAvatar = avatars[allProfessionals.length % avatars.length];
 
-      const newProf: Professional = {
-        id: Date.now(),
-        name: data.name,
-        specialty: data.specialty,
-        avatar: data.avatar || randomAvatar, // usar foto subida por usuario, sino el fallback aleatorio
-        color: data.color,
-        role: data.role,
-        email: `${data.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-        plan: 'Plan Estándar',
-        status: 'active'
-      };
+        const newProf: Professional = {
+          id: created.id,
+          name: data.name,
+          specialty: data.specialty,
+          avatar: data.avatar || randomAvatar, // usar foto subida por usuario, sino el fallback aleatorio
+          color: data.color,
+          role: data.role,
+          email: created.email,
+          plan: 'Plan Estándar',
+          status: 'active'
+        };
 
-      setAllProfessionals([...allProfessionals, newProf]);
-      setSuccessTitle('¡Miembro Registrado!');
-      setSuccessMessage(data.role === 'secretary' 
-        ? `El secretario/a "${data.name}" fue agregado correctamente al equipo administrativo.`
-        : `El profesional "${data.name}" se incorporó con éxito al equipo clínico.`
-      );
+        setAllProfessionals([...allProfessionals, newProf]);
+        setSuccessTitle('¡Miembro Registrado!');
+        setSuccessMessage(data.role === 'secretary' 
+          ? `El secretario/a "${data.name}" fue agregado correctamente al equipo administrativo.`
+          : `El profesional "${data.name}" se incorporó con éxito al equipo clínico.`
+        );
+      }
+      
+      setIsProfModalOpen(false);
+      setSelectedProfToEdit(null);
+      setIsSuccessOpen(true);
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.message;
+      alert(`No se pudo guardar el profesional: ${errMsg}`);
     }
-    
-    setIsProfModalOpen(false);
-    setSelectedProfToEdit(null);
-    setIsSuccessOpen(true);
   };
 
   // Orquestador Custom Confirm Delete: Miembro del equipo de trabajo
@@ -304,12 +339,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     setDeleteModalItemName(prof.name);
     setDeleteModalDescription(`¿Estás seguro de que deseas desvincular a "${prof.name}" de la clínica? Se suspenderá su acceso y se desactivará su agenda del calendario.`);
 
-    setOnConfirmDeleteCallback(() => () => {
-      setAllProfessionals(prev => prev.filter(p => p.id !== prof.id));
-      setIsConfirmDeleteOpen(false);
-      setSuccessTitle('¡Baja Procesada!');
-      setSuccessMessage(`El miembro de equipo "${prof.name}" fue removido exitosamente.`);
-      setIsSuccessOpen(true);
+    setOnConfirmDeleteCallback(() => async () => {
+      try {
+        await professionalService.deleteProfessional(prof.id);
+        setAllProfessionals(prev => prev.filter(p => p.id !== prof.id));
+        setIsConfirmDeleteOpen(false);
+        setSuccessTitle('¡Baja Procesada!');
+        setSuccessMessage(`El miembro de equipo "${prof.name}" fue removido exitosamente.`);
+        setIsSuccessOpen(true);
+      } catch (err: any) {
+        console.error(err);
+        alert(`No se pudo eliminar el profesional.`);
+      }
     });
 
     setIsConfirmDeleteOpen(true);
@@ -363,37 +404,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   };
 
   // Lógica CRUD de Pacientes: Crear o Actualizar
-  const handleCreateOrUpdatePatient = (data: {
+  const handleCreateOrUpdatePatient = async (data: {
     id?: number;
     name: string;
     email: string;
     phone: string;
   }) => {
-    if (data.id) {
-      setPatients(patients.map(p => p.id === data.id
-        ? { ...p, name: data.name, email: data.email, phone: data.phone }
-        : p
-      ));
-      setAppointments(appointments.map(app => app.patientId === data.id
-        ? { ...app, patientName: data.name }
-        : app
-      ));
-      setSuccessTitle('¡Paciente Actualizado!');
-      setSuccessMessage(`La ficha de contacto del paciente "${data.name}" se actualizó.`);
-    } else {
-      const newPatient: Patient = {
-        id: Date.now(),
-        name: data.name,
-        email: data.email,
-        phone: data.phone
-      };
-      setPatients([...patients, newPatient]);
-      setSuccessTitle('¡Paciente Registrado!');
-      setSuccessMessage(`El paciente "${data.name}" se dio de alta correctamente.`);
+    try {
+      if (data.id) {
+        await patientService.updatePatient(data.id, data);
+        setPatients(patients.map(p => p.id === data.id
+          ? { ...p, name: data.name, email: data.email, phone: data.phone }
+          : p
+        ));
+        setAppointments(appointments.map(app => app.patientId === data.id
+          ? { ...app, patientName: data.name }
+          : app
+        ));
+        setSuccessTitle('¡Paciente Actualizado!');
+        setSuccessMessage(`La ficha de contacto del paciente "${data.name}" se actualizó.`);
+      } else {
+        const created = await patientService.createPatient(data);
+        setPatients([...patients, created]);
+        setSuccessTitle('¡Paciente Registrado!');
+        setSuccessMessage(`El paciente "${data.name}" se dio de alta correctamente.`);
+      }
+      setIsPatientModalOpen(false);
+      setSelectedPatientToEdit(null);
+      setIsSuccessOpen(true);
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = err.response?.data?.message || err.message;
+      alert(`No se pudo guardar el paciente: ${errMsg}`);
     }
-    setIsPatientModalOpen(false);
-    setSelectedPatientToEdit(null);
-    setIsSuccessOpen(true);
   };
 
   // Orquestador Custom Confirm Delete: Paciente
@@ -402,12 +445,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     setDeleteModalItemName(patient.name);
     setDeleteModalDescription(`¿Estás seguro de que deseas eliminar la ficha médica y de contacto de "${patient.name}"? Los turnos agendados previamente mantendrán un registro histórico.`);
 
-    setOnConfirmDeleteCallback(() => () => {
-      setPatients(prevPatients => prevPatients.filter(p => p.id !== patient.id));
-      setIsConfirmDeleteOpen(false);
-      setSuccessTitle('¡Paciente Eliminado!');
-      setSuccessMessage(`La ficha médica de "${patient.name}" fue borrada.`);
-      setIsSuccessOpen(true);
+    setOnConfirmDeleteCallback(() => async () => {
+      try {
+        await patientService.deletePatient(patient.id);
+        setPatients(prevPatients => prevPatients.filter(p => p.id !== patient.id));
+        setIsConfirmDeleteOpen(false);
+        setSuccessTitle('¡Paciente Eliminado!');
+        setSuccessMessage(`La ficha médica de "${patient.name}" fue borrada.`);
+        setIsSuccessOpen(true);
+      } catch (err: any) {
+        console.error(err);
+        alert(`No se pudo eliminar el paciente.`);
+      }
     });
 
     setIsConfirmDeleteOpen(true);
@@ -540,7 +589,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const theme = getThemeClasses(themeColor);
 
   return (
-    <div className="flex bg-slate-50 h-screen w-screen overflow-hidden text-slate-800 animate-fade-in">
+    <div className="flex bg-slate-50 h-[100dvh] w-full overflow-hidden text-slate-800 animate-fade-in">
       <Sidebar 
         currentTab={currentTab} 
         setCurrentTab={setCurrentTab} 
@@ -552,39 +601,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         onCloseSidebar={() => setIsMobileSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 shrink-0">
-          <div className="flex items-center gap-3">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <header className="h-16 md:h-20 bg-white border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-8 shrink-0 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Botón Hamburguesa Móvil */}
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="p-2 -ml-1 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-50 md:hidden transition-colors"
+              className="p-2 -ml-1 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-50 md:hidden transition-colors shrink-0"
               title="Abrir Menú"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h2 className="text-sm md:text-xl font-bold text-slate-800 flex items-center gap-1.5 md:gap-2">
-              <span className="hidden sm:inline">Panel de Control</span>
-              <span className="text-slate-300 font-normal hidden sm:inline">|</span>
-              <span className="text-xs md:text-sm font-medium text-slate-500 truncate max-w-[140px] sm:max-w-none">Hola, {user.name}</span>
+            <h2 className="text-sm md:text-xl font-bold text-slate-800 flex items-center gap-1.5 md:gap-2 min-w-0">
+              <span className="hidden sm:inline shrink-0">Panel de Control</span>
+              <span className="text-slate-300 font-normal hidden sm:inline shrink-0">|</span>
+              <span className="text-xs md:text-sm font-medium text-slate-500 truncate">Hola, {user.name}</span>
             </h2>
             <div className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-full ${theme.badge} text-[10px] md:text-xs font-semibold shrink-0`}>
               {user.role === 'ADMIN' ? 'SaaS' : 'Agenda'}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             {/* Buscador visible únicamente para inquilinos */}
             {user.role !== 'ADMIN' && (
               <div className="relative hidden sm:block">
                 <input
                   type="text"
                   placeholder="Buscar turno..."
-                  className={`w-40 lg:w-64 pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all ${theme.focus}`}
+                  className={`w-36 md:w-44 lg:w-64 pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-none focus:ring-2 transition-all ${theme.focus}`}
                 />
-                <svg className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -592,8 +641,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col gap-5 md:gap-6 font-sans">
+        <main className="flex-1 p-3 sm:p-4 md:p-8 overflow-y-auto overflow-x-hidden flex flex-col gap-4 sm:gap-5 md:gap-6 font-sans">
           
+          {/* Banner de Límites para Plan Prueba */}
+          {user.planType === 'trial' && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 shrink-0 shadow-sm">
+              <div className="flex gap-3">
+                <span className="text-xl sm:text-2xl shrink-0">🚀</span>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-amber-800">Modo de Prueba Activo</h3>
+                  <p className="text-[11px] sm:text-xs text-amber-600 mt-0.5 font-medium">Tienes acceso a un sector limitado de acciones: máximo de 2 profesionales y 2 pacientes en tu agenda virtual.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-[11px] sm:text-xs font-bold uppercase shrink-0 w-full sm:w-auto">
+                <span className="bg-amber-100/80 border border-amber-200/50 text-amber-800 px-2.5 py-1.5 rounded-xl flex-1 sm:flex-none text-center">Profesionales: {allProfessionals.length} / 2</span>
+                <span className="bg-amber-100/80 border border-amber-200/50 text-amber-800 px-2.5 py-1.5 rounded-xl flex-1 sm:flex-none text-center">Pacientes: {patients.length} / 2</span>
+              </div>
+            </div>
+          )}
+
           {/* ========================================== */}
           {/*   VISTAS DEL INQUILINO (PROFESSIONAL)      */}
           {/* ========================================== */}
@@ -624,13 +690,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   </button>
                 </div>
 
-                <div className="flex gap-2.5 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5 w-full sm:w-auto">
                   {appointments.some(app => app.status === 'cancelled') && (
                     <button
                       onClick={handleClearCancelledAppointments}
                       className="w-full sm:w-auto px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 rounded-xl font-semibold text-xs md:text-sm shadow-sm hover:shadow-rose-100/10 transition-all duration-200 flex items-center justify-center gap-2"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                       Limpiar Cancelados
@@ -644,7 +710,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     }}
                     className={`w-full sm:w-auto px-5 py-2.5 ${theme.bg} text-white rounded-xl font-semibold text-xs md:text-sm shadow-md ${theme.shadow} transition-all duration-200 flex items-center justify-center gap-2`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
                     </svg>
                     Nuevo Turno

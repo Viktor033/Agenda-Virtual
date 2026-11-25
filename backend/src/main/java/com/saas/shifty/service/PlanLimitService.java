@@ -28,8 +28,10 @@ public class PlanLimitService {
         String planType = getPlanType(tenantId);
         
         int limit = Integer.MAX_VALUE;
-        if ("basic".equalsIgnoreCase(planType) || "trial".equalsIgnoreCase(planType)) {
-            limit = 1; // Límite de 1 profesional para planes basic y trial
+        if ("trial".equalsIgnoreCase(planType)) {
+            limit = 2; // Límite de 2 profesionales para el plan trial
+        } else if ("basic".equalsIgnoreCase(planType)) {
+            limit = 1; // Límite de 1 profesional para planes basic
         } else if ("standard".equalsIgnoreCase(planType)) {
             limit = 5;
         }
@@ -42,6 +44,29 @@ public class PlanLimitService {
             throw new PlanLimitExceededException(
                 "Límite de Profesionales Alcanzado",
                 "Su plan actual (" + planType.toUpperCase() + ") solo permite un máximo de " + limit + " profesional(es) activo(s). Por favor actualice su plan."
+            );
+        }
+    }
+
+    /**
+     * Valida si el cliente superó el límite de pacientes de su plan.
+     */
+    public void verifyPatientLimit(Long tenantId) {
+        String planType = getPlanType(tenantId);
+        
+        int limit = Integer.MAX_VALUE;
+        if ("trial".equalsIgnoreCase(planType)) {
+            limit = 2; // Límite de 2 pacientes para el plan trial
+        }
+
+        String countSql = "SELECT COUNT(*) FROM patients WHERE tenant_id = ?";
+        Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, tenantId);
+        
+        if (count != null && count >= limit) {
+            log.warn("Límite de pacientes alcanzado para Tenant {}. Límite del plan '{}': {}", tenantId, planType, limit);
+            throw new PlanLimitExceededException(
+                "Límite de Pacientes Alcanzado",
+                "Su plan actual (" + planType.toUpperCase() + ") solo permite un máximo de " + limit + " paciente(s). Por favor actualice su plan."
             );
         }
     }

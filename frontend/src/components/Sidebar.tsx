@@ -185,12 +185,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* 1. BARRA LATERAL PARA ESCRITORIO (md en adelante) */}
-      <div className="hidden md:flex w-64 bg-slate-900 text-slate-100 flex-col border-r border-slate-800 shrink-0 h-screen font-sans">
+      <div className="hidden md:flex w-64 bg-slate-900 text-slate-100 flex-col border-r border-slate-800 shrink-0 h-[100dvh] font-sans">
         {sidebarContent}
       </div>
 
       {/* 2. CAJÓN DESLIZANTE PARA MÓVIL (debajo de md) */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:hidden font-sans shadow-2xl`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:hidden font-sans shadow-2xl`}>
         {sidebarContent}
       </div>
 

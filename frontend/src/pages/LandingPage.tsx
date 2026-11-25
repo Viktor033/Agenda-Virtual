@@ -87,10 +87,75 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
     },
   ];
 
-  const handlePlanClick = (planName: string, planPrice: number) => {
+  const handlePlanClick = async (planName: string, planPrice: number) => {
     setSelectedPlan({ name: planName, price: planPrice });
-    setStep(1);
     setError(null);
+
+    if (planName === 'Plan Prueba') {
+      setLoading(true);
+      try {
+        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const autoSubdomain = `prueba${randomId}`;
+        const autoData = {
+          tenantName: `Clínica Prueba ${randomId}`,
+          oficioId: 2, // Odontología
+          subdomain: autoSubdomain,
+          adminEmail: `admin@${autoSubdomain}.com`,
+          adminPassword: 'admin',
+        };
+        setFormData(autoData);
+
+        // 1. Llamar al backend real de aprovisionamiento
+        const response = await axios.post('/api/v1/provision/register', autoData);
+        const tenantId = response.data.tenantId;
+        setCreatedTenantId(tenantId);
+
+        // 2. Simular llamada exitosa a webhook de Stripe para actualizar la suscripción activa
+        await axios.post('/api/v1/webhooks/stripe', {
+          id: "evt_test_signup_" + Date.now(),
+          type: "checkout.session.completed",
+          data: {
+            object: {
+              customer: "cus_simulated_" + Date.now(),
+              subscription: "sub_simulated_" + Date.now(),
+              client_reference_id: tenantId.toString(),
+              expires_at: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
+              metadata: {
+                tenant_id: tenantId.toString(),
+                plan_type: 'trial'
+              }
+            }
+          },
+          dataObjectDeserializer: {
+            object: {
+              customer: "cus_simulated_" + Date.now(),
+              subscription: "sub_simulated_" + Date.now(),
+              clientReferenceId: tenantId.toString(),
+              expiresAt: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
+              metadata: {
+                tenant_id: tenantId.toString(),
+                plan_type: 'trial'
+              }
+            }
+          }
+        }, {
+          headers: {
+            'Stripe-Signature': 'simulated_signature'
+          }
+        });
+
+        setStep(3); // Éxito directo
+      } catch (err: any) {
+        console.error(err);
+        const backendError = err.response?.data?.message || err.response?.data || err.message;
+        setError('Error al iniciar la prueba: ' + backendError);
+        setSelectedPlan(null);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setStep(1);
+    }
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -137,6 +202,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       await axios.post('/api/v1/webhooks/stripe', {
         id: "evt_test_signup_" + Date.now(),
         type: "checkout.session.completed",
+        data: {
+          object: {
+            customer: "cus_simulated_" + Date.now(),
+            subscription: "sub_simulated_" + Date.now(),
+            client_reference_id: tenantId.toString(),
+            expires_at: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
+            metadata: {
+              tenant_id: tenantId.toString(),
+              plan_type: 'trial'
+            }
+          }
+        },
         dataObjectDeserializer: {
           object: {
             customer: "cus_simulated_" + Date.now(),
@@ -145,7 +222,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
             expiresAt: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
             metadata: {
               tenant_id: tenantId.toString(),
-              plan_type: 'basic'
+              plan_type: 'trial'
             }
           }
         }
@@ -183,10 +260,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       const tenantId = response.data.tenantId;
       setCreatedTenantId(tenantId);
 
+      const targetPlanType = selectedPlan?.name.toLowerCase().includes('premium') ? 'premium' :
+                             selectedPlan?.name.toLowerCase().includes('estándar') ? 'standard' : 'basic';
+
       // 2. Simular llamada exitosa a webhook de Stripe para actualizar la suscripción activa
       await axios.post('/api/v1/webhooks/stripe', {
         id: "evt_test_signup_" + Date.now(),
         type: "checkout.session.completed",
+        data: {
+          object: {
+            customer: "cus_simulated_" + Date.now(),
+            subscription: "sub_simulated_" + Date.now(),
+            client_reference_id: tenantId.toString(),
+            expires_at: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
+            metadata: {
+              tenant_id: tenantId.toString(),
+              plan_type: targetPlanType
+            }
+          }
+        },
         dataObjectDeserializer: {
           object: {
             customer: "cus_simulated_" + Date.now(),
@@ -195,8 +287,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
             expiresAt: Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000),
             metadata: {
               tenant_id: tenantId.toString(),
-              plan_type: selectedPlan?.name.toLowerCase().includes('premium') ? 'premium' :
-                         selectedPlan?.name.toLowerCase().includes('estándar') ? 'standard' : 'basic'
+              plan_type: targetPlanType
             }
           }
         }
@@ -217,24 +308,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans overflow-y-auto relative pb-12">
+    <div className="min-h-[100dvh] bg-slate-950 text-white font-sans overflow-x-hidden overflow-y-auto relative pb-12">
       {/* Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/3 right-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Header */}
-      <header className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-emerald-500 flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-500/20">
+      <header className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-emerald-500 flex items-center justify-center font-bold text-lg sm:text-xl shadow-lg shadow-indigo-500/20 shrink-0">
             S
           </div>
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+          <span className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
             Shifty SaaS
           </span>
         </div>
         <button
           onClick={onNavigateToLogin}
-          className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition duration-300 text-sm font-semibold hover:scale-[1.02] active:scale-95"
+          className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition duration-300 text-xs sm:text-sm font-semibold hover:scale-[1.02] active:scale-95"
         >
           Iniciar Sesión
         </button>
@@ -242,25 +333,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
 
       {/* Main Pricing View */}
       {!selectedPlan ? (
-        <section className="max-w-5xl mx-auto px-6 text-center pt-16 pb-20 relative z-10">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-6">
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 text-center pt-8 sm:pt-16 pb-14 sm:pb-20 relative z-10">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-5 sm:mb-6">
             ✨ Planes Flexibles & Escalables
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-            Elige el plan ideal para tu <br />
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 sm:mb-6 leading-tight bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            Elige el plan ideal para tu <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
               Consultorio o Clínica
             </span>
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-sm sm:text-lg text-slate-400 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
             Sin contratos de permanencia. Todos los planes cuentan con la robusta tecnología de aislamiento multi-cliente y velocidad enterprise.
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-3 bg-slate-900/80 border border-white/5 p-1.5 rounded-2xl mb-12">
+          <div className="inline-flex items-center gap-2 sm:gap-3 bg-slate-900/80 border border-white/5 p-1.5 rounded-2xl mb-10 sm:mb-12">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
                 billingCycle === 'monthly' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -268,7 +359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 ${
                 billingCycle === 'yearly' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -277,36 +368,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
           </div>
 
           {/* Cards Grid */}
-          <div className="grid md:grid-cols-3 gap-8 text-left max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left max-w-6xl mx-auto">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative rounded-3xl p-8 transition duration-300 flex flex-col justify-between ${
+                className={`relative rounded-3xl p-6 sm:p-8 transition duration-300 flex flex-col justify-between ${
                   plan.popular
                     ? 'bg-slate-900/90 border-2 border-emerald-500/50 shadow-xl shadow-emerald-500/5 backdrop-blur-md hover:translate-y-[-4px]'
                     : 'bg-slate-900/40 border border-white/5 backdrop-blur-sm hover:border-white/10 hover:translate-y-[-2px]'
                 }`}
               >
                 {plan.popular && (
-                  <span className="absolute top-0 right-8 -translate-y-1/2 bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  <span className="absolute top-0 right-6 sm:right-8 -translate-y-1/2 bg-emerald-500 text-slate-950 text-[11px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                     RECOMENDADO
                   </span>
                 )}
 
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-slate-400 text-sm mb-6 min-h-[40px]">{plan.tagline}</p>
+                  <h3 className="text-lg sm:text-xl font-bold mb-2">{plan.name}</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm mb-5 sm:mb-6 min-h-[36px] sm:min-h-[40px]">{plan.tagline}</p>
 
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-extrabold">${plan.price}</span>
-                    <span className="text-slate-500 text-sm">USD / {billingCycle === 'monthly' ? 'mes' : 'año'}</span>
+                  <div className="flex items-baseline gap-1 mb-6 sm:mb-8">
+                    <span className="text-3xl sm:text-4xl font-extrabold">${plan.price}</span>
+                    <span className="text-slate-500 text-xs sm:text-sm">USD / {billingCycle === 'monthly' ? 'mes' : 'año'}</span>
                   </div>
 
-                  <div className="w-full h-px bg-white/5 mb-8"></div>
+                  <div className="w-full h-px bg-white/5 mb-6 sm:mb-8"></div>
 
-                  <ul className="space-y-4 mb-8">
+                  <ul className="space-y-3.5 sm:space-y-4 mb-6 sm:mb-8">
                     {plan.features.map((feat) => (
-                      <li key={feat} className="flex items-start gap-3 text-sm text-slate-300">
+                      <li key={feat} className="flex items-start gap-3 text-xs sm:text-sm text-slate-300">
                         <svg
                           className={`w-5 h-5 shrink-0 ${
                             plan.popular ? 'text-emerald-400' : 'text-indigo-400'
@@ -326,7 +417,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
 
                 <button
                   onClick={() => handlePlanClick(plan.name, plan.price)}
-                  className={`w-full py-3.5 rounded-2xl font-semibold transition text-sm flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 ${
+                  className={`w-full py-3.5 rounded-2xl font-semibold transition text-xs sm:text-sm flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 ${
                     plan.popular
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold hover:shadow-lg hover:shadow-emerald-500/20'
                       : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
@@ -340,21 +431,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
         </section>
       ) : (
         /* Sign Up & Checkout Modal Wizard Overlay */
-        <div className="max-w-xl mx-auto px-6 pt-8 pb-16 relative z-10">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 pt-4 sm:pt-8 pb-12 sm:pb-16 relative z-10">
           <button
             onClick={() => setSelectedPlan(null)}
-            className="text-slate-400 hover:text-white text-sm mb-6 flex items-center gap-2 transition"
+            className="text-slate-400 hover:text-white text-sm mb-5 sm:mb-6 flex items-center gap-2 transition"
           >
             ← Volver a planes
           </button>
 
           {/* Form Step */}
           {step === 1 && (
-            <div className="bg-slate-900/60 border border-white/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
+            <div className="bg-slate-900/60 border border-white/10 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl">
               <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest block mb-1">
                 Paso 1 de 2
               </span>
-              <h2 className="text-2xl font-extrabold mb-6">
+              <h2 className="text-xl sm:text-2xl font-extrabold mb-5 sm:mb-6">
                 Crear cuenta para {selectedPlan.name}
               </h2>
 
@@ -364,7 +455,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
                 </div>
               )}
 
-              <form onSubmit={executeRegister} className="space-y-5">
+              <form onSubmit={executeRegister} className="space-y-4 sm:space-y-5">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                     Nombre de tu Clínica o Consultorio
@@ -380,7 +471,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                       Especialidad / Oficio
@@ -464,11 +555,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
 
           {/* Stripe Payment Step */}
           {step === 2 && (
-            <div className="bg-slate-900/60 border border-white/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
+            <div className="bg-slate-900/60 border border-white/10 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl">
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block mb-1">
                 Paso 2 de 2
               </span>
-              <h2 className="text-2xl font-extrabold mb-2">
+              <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
                 Pasarela de Pago Segura
               </h2>
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-white/5 px-2.5 py-1 rounded-full mb-6">
@@ -483,13 +574,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
 
               {/* Order Summary */}
               <div className="p-4 rounded-2xl bg-slate-950 border border-white/5 mb-6">
-                <div className="flex justify-between items-center text-sm font-semibold mb-2">
+                <div className="flex justify-between items-center text-sm font-semibold mb-2 gap-2">
                   <span>{selectedPlan.name} ({billingCycle === 'monthly' ? 'Mensual' : 'Anual'})</span>
-                  <span className="text-indigo-400">${selectedPlan.price}.00 USD</span>
+                  <span className="text-indigo-400 shrink-0">${selectedPlan.price}.00 USD</span>
                 </div>
-                <div className="flex justify-between items-center text-xs text-slate-500">
+                <div className="flex justify-between items-center text-xs text-slate-500 gap-2">
                   <span>Aprovisionamiento inmediato de subdominio</span>
-                  <span>Gratis</span>
+                  <span className="shrink-0">Gratis</span>
                 </div>
                 <div className="w-full h-px bg-white/5 my-3"></div>
                 <div className="flex justify-between items-center text-base font-bold">
@@ -565,31 +656,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
 
           {/* Success Step */}
           {step === 3 && (
-            <div className="bg-slate-900/60 border border-emerald-500/30 backdrop-blur-md rounded-3xl p-8 shadow-2xl text-center">
+            <div className="bg-slate-900/60 border border-emerald-500/30 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl text-center">
               <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-400 text-3xl">
                 ✓
               </div>
-              <h2 className="text-3xl font-extrabold mb-3 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                 ¡Clínica Registrada!
               </h2>
-              <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
                 El sistema ha completado de forma asíncrona la suscripción para tu clínica <strong className="text-white">"{formData.tenantName}"</strong>.
               </p>
 
               {/* Client Access Details Card */}
-              <div className="p-5 rounded-2xl bg-slate-950 border border-white/5 text-left space-y-3 mb-8">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-white/5 text-left space-y-3 mb-8">
                 <div>
                   <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest block">
                     URL de acceso único
                   </span>
                   <a
                     href={`http://${formData.subdomain}.agenda.com:8082`}
-                    className="text-emerald-400 font-semibold hover:underline text-sm break-all"
+                    className="text-emerald-400 font-semibold hover:underline text-xs sm:text-sm break-all"
                   >
                     http://{formData.subdomain}.agenda.com:8082
                   </a>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
                   <div>
                     <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest block">
                       ID del Cliente
@@ -621,9 +712,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
       )}
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto px-6 border-t border-white/5 pt-12 flex flex-col md:flex-row items-center justify-between text-slate-500 text-sm relative z-10">
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 border-t border-white/5 pt-8 sm:pt-12 flex flex-col md:flex-row items-center justify-between text-slate-500 text-xs sm:text-sm relative z-10 text-center md:text-left">
         <span>© 2026 Shifty SaaS Inc. Todos los derechos reservados.</span>
-        <div className="flex gap-6 mt-4 md:mt-0">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 md:mt-0">
           <a href="#" className="hover:text-slate-300 transition">Términos de Servicio</a>
           <a href="#" className="hover:text-slate-300 transition">Política de Privacidad</a>
           <a href="#" className="hover:text-slate-300 transition">Soporte</a>

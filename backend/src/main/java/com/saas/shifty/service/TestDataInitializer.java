@@ -23,9 +23,18 @@ public class TestDataInitializer implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(TestDataInitializer.class);
 
     private final SubscriptionRepository subscriptionRepository;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @Override
     public void run(String... args) throws Exception {
+        // Asegurar que la columna plan_type de la tabla subscriptions soporte 'trial' (cambiándola a VARCHAR para evitar limitaciones de ENUM)
+        try {
+            jdbcTemplate.execute("ALTER TABLE subscriptions MODIFY COLUMN plan_type VARCHAR(50) NOT NULL DEFAULT 'basic'");
+            logger.info("[TestDataInitializer] Alteración de tabla subscriptions exitosa (columna plan_type cambiada a VARCHAR).");
+        } catch (Exception e) {
+            logger.warn("[TestDataInitializer] No se pudo alterar la tabla subscriptions: {}", e.getMessage());
+        }
+
         // Identificador de tenant de prueba (puede ser cualquier número, aquí usamos 1L)
         Long tenantId = 1L;
         // Establecer el contexto del tenant antes de persistir

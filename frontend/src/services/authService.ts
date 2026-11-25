@@ -12,6 +12,7 @@ export interface LoginResponse {
   role: string;
   tenantId: number;
   expiresIn: number;
+  planType?: string;
 }
 
 export interface UserSession {
@@ -20,6 +21,7 @@ export interface UserSession {
   role: 'ADMIN' | 'PROFESSIONAL';
   tenantId: number;
   professionalId?: number;
+  planType?: string;
 }
 
 /**
@@ -45,6 +47,7 @@ export async function login(request: LoginRequest): Promise<UserSession> {
     name: role === 'ADMIN' ? 'Administrador Global' : `Dr/a. ${friendlyName}`,
     role,
     tenantId: data.tenantId,
+    planType: data.planType,
   };
 }
 

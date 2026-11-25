@@ -20,7 +20,7 @@ function App() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-auto">
+    <div className="w-full min-h-[100dvh] overflow-x-hidden">
       {user ? (
         <Dashboard user={user} onLogout={handleLogout} />
       ) : view === 'landing' ? (
@@ -30,10 +30,10 @@ function App() {
           onRegisterSuccess={handleRegisterSuccess}
         />
       ) : (
-        <div className="w-full h-full relative">
+        <div className="w-full min-h-[100dvh] relative">
           <button
             onClick={() => setView('landing')}
-            className="absolute top-6 left-6 z-50 px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition"
+            className="fixed sm:absolute top-4 left-4 sm:top-6 sm:left-6 z-50 px-3.5 py-2 sm:px-4 sm:py-2 bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-white/10 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition shadow-lg"
           >
             ← Volver al Inicio
           </button>

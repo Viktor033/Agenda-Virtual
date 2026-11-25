@@ -214,32 +214,32 @@ export const WhatsAppBotTab: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 p-1 h-full w-full overflow-hidden animate-fade-in font-sans">
+    <div className="flex flex-col xl:flex-row gap-6 p-0.5 sm:p-1 w-full xl:h-full xl:overflow-hidden animate-fade-in font-sans pb-8 xl:pb-1">
       
       {/* 1. SECCIÓN IZQUIERDA: CONFIGURACIÓN GENERAL DEL BOT */}
-      <div className="flex-1 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col gap-6 overflow-y-auto">
+      <div className="flex-1 bg-white border border-slate-100 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-5 sm:gap-6 xl:overflow-y-auto">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 bg-emerald-100 text-emerald-600 rounded-xl shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </span>
-            <h2 className="text-lg font-bold text-slate-800">Panel de Control WhatsApp Bot</h2>
+            <h2 className="text-base sm:text-lg font-bold text-slate-800">Panel de Control WhatsApp Bot</h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">Configura las credenciales y el flujo conversacional del bot de tu clínica.</p>
         </div>
 
         <div className="space-y-4">
           {/* Switch de Estado */}
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-slate-50 rounded-xl border border-slate-100">
             <div>
               <h3 className="text-xs font-bold text-slate-700">Estado del Bot</h3>
               <p className="text-[10px] text-slate-500">Habilita o deshabilita la respuesta automática del bot.</p>
             </div>
             <button
               onClick={() => setBotStatus(botStatus === 'active' ? 'inactive' : 'active')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 self-start sm:self-auto shrink-0 ${
                 botStatus === 'active' 
                   ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/10' 
                   : 'bg-slate-200 text-slate-600'
@@ -252,19 +252,19 @@ export const WhatsAppBotTab: React.FC = () => {
           {/* URL Webhook para Meta */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 block">URL de Webhook oficial (Meta Developer Console)</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 readOnly
                 value={`https://api.agenda-multi.com/api/v1/whatsapp/webhook/${tenantId}`}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-500 focus:outline-none select-all"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-500 focus:outline-none select-all min-w-0"
               />
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(`https://api.agenda-multi.com/api/v1/whatsapp/webhook/${tenantId}`);
                   alert('¡URL de Webhook copiada al portapapeles!');
                 }}
-                className="px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-colors"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-colors shrink-0"
                 title="Copiar URL"
               >
                 Copiar
@@ -319,19 +319,19 @@ export const WhatsAppBotTab: React.FC = () => {
       </div>
 
       {/* 2. SECCIÓN DERECHA: EL SMARTPHONE SIMULATOR */}
-      <div className="w-full xl:w-[380px] shrink-0 flex flex-col items-center justify-center p-3">
+      <div className="w-full xl:w-[380px] shrink-0 flex flex-col items-center justify-center p-1 sm:p-3">
         
         {/* Teléfono Estilo iPhone Premium */}
-        <div className="w-[340px] h-[640px] bg-slate-950 rounded-[48px] p-3 shadow-2xl relative border-4 border-slate-800 ring-1 ring-slate-700/50 flex flex-col overflow-hidden">
+        <div className="w-full max-w-[340px] h-[560px] sm:h-[640px] bg-slate-950 rounded-[40px] sm:rounded-[48px] p-2.5 sm:p-3 shadow-2xl relative border-4 border-slate-800 ring-1 ring-slate-700/50 flex flex-col overflow-hidden">
           
           {/* Botón de encendido / sensores */}
-          <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-slate-950 rounded-full z-30 flex items-center justify-center gap-2">
+          <div className="absolute top-5 sm:top-6 left-1/2 transform -translate-x-1/2 w-28 sm:w-32 h-5 sm:h-6 bg-slate-950 rounded-full z-30 flex items-center justify-center gap-2">
             <div className="w-2.5 h-2.5 bg-slate-900 rounded-full border border-slate-800"></div>
             <div className="w-14 h-1.5 bg-slate-800 rounded-full"></div>
           </div>
 
           {/* Pantalla del Celular */}
-          <div className="flex-1 bg-[#efeae2] rounded-[36px] overflow-hidden flex flex-col relative">
+          <div className="flex-1 bg-[#efeae2] rounded-[30px] sm:rounded-[36px] overflow-hidden flex flex-col relative">
             
             {/* Cabecera del WhatsApp (Verde) */}
             <div className="h-[74px] bg-[#075e54] text-white pt-6 px-4 flex items-center justify-between shrink-0 shadow-md">
@@ -446,26 +446,26 @@ export const WhatsAppBotTab: React.FC = () => {
         <div className="mt-3.5 flex flex-col gap-2 w-full max-w-[340px]">
           <button
             onClick={handleStartChat}
-            className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/10 flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/10 flex items-center justify-center gap-1.5 transition-colors"
           >
             <span>🚀 Iniciar Chat de Prueba</span>
           </button>
-          <div className="flex justify-between gap-2">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
             <button
               onClick={() => handleSendMessage('1')}
-              className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors"
+              className="py-1.5 px-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors text-center"
             >
               Opción "1" (Agendar)
             </button>
             <button
               onClick={() => handleSendMessage('2')}
-              className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors"
+              className="py-1.5 px-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors text-center"
             >
               Opción "2" (Ver Turnos)
             </button>
             <button
               onClick={() => handleSendMessage('3')}
-              className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors"
+              className="py-1.5 px-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 transition-colors text-center"
             >
               Opción "3" (Cancelar)
             </button>

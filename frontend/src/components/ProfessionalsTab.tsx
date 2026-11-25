@@ -23,17 +23,17 @@ export const ProfessionalsTab: React.FC<ProfessionalsTabProps> = ({
     <div className="flex flex-col gap-8 animate-fade-in font-sans pb-10">
       
       {/* Cabecera Principal */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shrink-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl border border-slate-100 shadow-sm shrink-0">
         <div>
-          <h2 className="text-lg font-bold text-slate-800 font-sans">Equipo de Trabajo</h2>
+          <h2 className="text-base sm:text-lg font-bold text-slate-800 font-sans">Equipo de Trabajo</h2>
           <p className="text-xs text-slate-500 mt-0.5 font-sans">Administra los profesionales médicos y el personal de secretaría activa</p>
         </div>
         
         <button
           onClick={onOpenAddModal}
-          className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-xs shadow-md hover:bg-indigo-700 hover:shadow-indigo-600/10 transition-all duration-200 flex items-center gap-2"
+          className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-xs shadow-md hover:bg-indigo-700 hover:shadow-indigo-600/10 transition-all duration-200 flex items-center justify-center gap-2 shrink-0"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
           Agregar Miembro
@@ -60,8 +60,8 @@ export const ProfessionalsTab: React.FC<ProfessionalsTabProps> = ({
             return (
               <div key={prof.id} className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-4 group relative overflow-hidden">
                 
-                {/* Botones de acción flotantes en hover */}
-                <div className="absolute top-4 right-4 flex gap-1 bg-white/95 p-0.5 rounded-lg border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm select-none z-10">
+                {/* Botones de acción flotantes en hover (siempre visibles en móvil) */}
+                <div className="absolute top-4 right-4 flex gap-1 bg-white/95 p-0.5 rounded-lg border border-slate-100 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm select-none z-10">
                   <button
                     onClick={() => onEditProfessional(prof)}
                     className="p-1 rounded hover:bg-slate-100 text-indigo-600 transition-colors"
@@ -148,8 +148,8 @@ export const ProfessionalsTab: React.FC<ProfessionalsTabProps> = ({
           {secretaries.map((sec) => (
             <div key={sec.id} className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-4 group relative overflow-hidden">
               
-              {/* Botones de acción flotantes en hover */}
-              <div className="absolute top-4 right-4 flex gap-1 bg-white/95 p-0.5 rounded-lg border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm select-none z-10">
+              {/* Botones de acción flotantes en hover (siempre visibles en móvil) */}
+              <div className="absolute top-4 right-4 flex gap-1 bg-white/95 p-0.5 rounded-lg border border-slate-100 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm select-none z-10">
                 <button
                   onClick={() => onEditProfessional(sec)}
                   className="p-1 rounded hover:bg-slate-100 text-indigo-600 transition-colors"
