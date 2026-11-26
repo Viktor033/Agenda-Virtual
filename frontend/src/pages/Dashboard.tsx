@@ -16,6 +16,7 @@ import { SettingsTab } from '../components/SettingsTab';
 import { SaaSAdminTab } from '../components/SaaSAdminTab';
 import { SaaSUsersTab } from '../components/SaaSUsersTab';
 import { WhatsAppBotTab } from '../components/WhatsAppBotTab';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 import { Professional, Appointment, Service, Patient } from '../types';
 import { UserSession } from '../services/authService';
 import * as patientService from '../services/patientService';
@@ -26,9 +27,16 @@ import * as professionalService from '../services/professionalService';
 interface DashboardProps {
   user: UserSession;
   onLogout: () => void;
+  isDark?: boolean;
+  onToggleTheme?: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
+export const Dashboard: React.FC<DashboardProps> = ({
+  user,
+  onLogout,
+  isDark = false,
+  onToggleTheme,
+}) => {
   // Inicialización de la pestaña predeterminada según el Rol SaaS
   const [currentTab, setCurrentTab] = useState<string>(
     user.role === 'ADMIN' ? 'saas_billing' : 'agenda'
@@ -605,7 +613,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const theme = getThemeClasses(themeColor);
 
   return (
-    <div className="flex bg-slate-50 h-[100dvh] w-full overflow-hidden text-slate-800 animate-fade-in">
+    <div className="theme-dashboard flex bg-slate-50 h-[100dvh] w-full overflow-hidden text-slate-800 animate-fade-in transition-colors duration-200">
       <Sidebar 
         currentTab={currentTab} 
         setCurrentTab={setCurrentTab} 
@@ -640,7 +648,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Buscador visible únicamente para inquilinos */}
             {user.role !== 'ADMIN' && (
               <div className="relative hidden sm:block">
@@ -654,6 +662,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 </svg>
               </div>
             )}
+
+            {/* Botón de Modo Claro / Oscuro */}
+            {onToggleTheme && <ThemeToggleButton isDark={isDark} onToggle={onToggleTheme} />}
           </div>
         </header>
 

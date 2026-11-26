@@ -125,7 +125,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-16 pb-10 sm:py-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 relative overflow-x-hidden overflow-y-auto select-none">
+    <div className="theme-public w-full min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-16 pb-10 sm:py-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 relative overflow-x-hidden overflow-y-auto select-none transition-colors duration-200">
 
       {/* Círculos decorativos */}
       <div className="absolute w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] rounded-full bg-indigo-500/10 blur-[100px] -top-20 -left-20 animate-pulse pointer-events-none" />

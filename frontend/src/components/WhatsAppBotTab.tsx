@@ -331,7 +331,7 @@ export const WhatsAppBotTab: React.FC = () => {
           </div>
 
           {/* Pantalla del Celular */}
-          <div className="flex-1 bg-[#efeae2] rounded-[30px] sm:rounded-[36px] overflow-hidden flex flex-col relative">
+          <div className="wa-phone-screen flex-1 bg-[#efeae2] rounded-[30px] sm:rounded-[36px] overflow-hidden flex flex-col relative">
             
             {/* Cabecera del WhatsApp (Verde) */}
             <div className="h-[74px] bg-[#075e54] text-white pt-6 px-4 flex items-center justify-between shrink-0 shadow-md">
