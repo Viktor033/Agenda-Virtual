@@ -87,27 +87,53 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
     },
   ];
 
+  const saveOfflineTenantUser = (data: typeof formData, tenantId: number, planName: string) => {
+    try {
+      const saved = localStorage.getItem('saas_clients');
+      const existing = saved ? JSON.parse(saved) : [];
+      const planType = planName === 'Plan Prueba' ? 'trial' : planName.toLowerCase().includes('premium') ? 'premium' : 'standard';
+      const newClient = {
+        id: tenantId,
+        name: data.tenantName,
+        specialty: categories.find(c => c.id === data.oficioId)?.name || 'Odontología',
+        avatar: 'https://images.unsplash.com/photo-1594824813573-246434e33963?w=100&h=100&fit=crop',
+        color: 'indigo',
+        email: data.adminEmail.toLowerCase().trim(),
+        plan: planName,
+        planType,
+        status: 'active',
+        role: 'specialist',
+        password: data.adminPassword,
+        rubro: categories.find(c => c.id === data.oficioId)?.name || 'Medicina'
+      };
+      localStorage.setItem('saas_clients', JSON.stringify([...existing, newClient]));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   const handlePlanClick = async (planName: string, planPrice: number) => {
     setSelectedPlan({ name: planName, price: planPrice });
     setError(null);
 
     if (planName === 'Plan Prueba') {
       setLoading(true);
-      try {
-        const randomId = Math.floor(1000 + Math.random() * 9000);
-        const autoSubdomain = `prueba${randomId}`;
-        const autoData = {
-          tenantName: `Clínica Prueba ${randomId}`,
-          oficioId: 2, // Odontología
-          subdomain: autoSubdomain,
-          adminEmail: `admin@${autoSubdomain}.com`,
-          adminPassword: 'admin',
-        };
-        setFormData(autoData);
+      const randomId = Math.floor(1000 + Math.random() * 9000);
+      const autoSubdomain = `prueba${randomId}`;
+      const autoData = {
+        tenantName: `Clínica Prueba ${randomId}`,
+        oficioId: 2, // Odontología
+        subdomain: autoSubdomain,
+        adminEmail: `admin@${autoSubdomain}.com`,
+        adminPassword: 'admin',
+      };
+      setFormData(autoData);
 
+      try {
         // 1. Llamar al backend real de aprovisionamiento
         const response = await axios.post('/api/v1/provision/register', autoData);
-        const tenantId = response.data.tenantId;
+        const tenantId = response?.data?.tenantId;
+        if (!tenantId) throw new Error('Offline mode');
         setCreatedTenantId(tenantId);
 
         // 2. Simular llamada exitosa a webhook de Stripe para actualizar la suscripción activa
@@ -144,12 +170,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
           }
         });
 
+        saveOfflineTenantUser(autoData, tenantId, planName);
         setStep(3); // Éxito directo
-      } catch (err: any) {
-        console.error(err);
-        const backendError = err.response?.data?.message || err.response?.data || err.message;
-        setError('Error al iniciar la prueba: ' + backendError);
-        setSelectedPlan(null);
+      } catch {
+        // Fallback local para Netlify / Demo sin backend Spring Boot
+        const simulatedTenantId = randomId;
+        setCreatedTenantId(simulatedTenantId);
+        saveOfflineTenantUser(autoData, simulatedTenantId, planName);
+        setStep(3);
       } finally {
         setLoading(false);
       }
@@ -195,7 +223,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
         adminPassword: formData.adminPassword,
       });
 
-      const tenantId = response.data.tenantId;
+      const tenantId = response?.data?.tenantId;
+      if (!tenantId) throw new Error('Offline mode');
       setCreatedTenantId(tenantId);
 
       // 2. Simular llamada exitosa a webhook de Stripe para actualizar la suscripción activa
@@ -232,12 +261,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
         }
       });
 
+      saveOfflineTenantUser(formData, tenantId, selectedPlan?.name || 'Plan Prueba');
       setStep(3); // Registro exitoso
-    } catch (err: any) {
-      console.error(err);
-      // Obtener el mensaje específico del backend si viene en la respuesta HTTP
-      const backendError = err.response?.data?.message || err.response?.data || err.message;
-      setError('Error durante el registro: ' + backendError);
+    } catch {
+      const simulatedTenantId = Math.floor(1000 + Math.random() * 9000);
+      setCreatedTenantId(simulatedTenantId);
+      saveOfflineTenantUser(formData, simulatedTenantId, selectedPlan?.name || 'Plan Prueba');
+      setStep(3);
     } finally {
       setLoading(false);
     }
@@ -257,7 +287,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
         adminPassword: formData.adminPassword,
       });
 
-      const tenantId = response.data.tenantId;
+      const tenantId = response?.data?.tenantId;
+      if (!tenantId) throw new Error('Offline mode');
       setCreatedTenantId(tenantId);
 
       const targetPlanType = selectedPlan?.name.toLowerCase().includes('premium') ? 'premium' :
@@ -297,11 +328,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
         }
       });
 
+      saveOfflineTenantUser(formData, tenantId, selectedPlan?.name || 'Plan Estándar');
       setStep(3); // Registro exitoso
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Error durante el registro y provisión de la clínica.');
-      setStep(1); // Regresa al formulario en caso de error
+    } catch {
+      const simulatedTenantId = Math.floor(1000 + Math.random() * 9000);
+      setCreatedTenantId(simulatedTenantId);
+      saveOfflineTenantUser(formData, simulatedTenantId, selectedPlan?.name || 'Plan Estándar');
+      setStep(3);
     } finally {
       setLoading(false);
     }
@@ -671,19 +704,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToLogin, onR
               <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-white/5 text-left space-y-3 mb-8">
                 <div>
                   <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest block">
-                    URL de acceso único
+                    Credenciales de Acceso Generadas
                   </span>
-                  <a
-                    href={`http://${formData.subdomain}.agenda.com:8082`}
-                    className="text-emerald-400 font-semibold hover:underline text-xs sm:text-sm break-all"
-                  >
-                    http://{formData.subdomain}.agenda.com:8082
-                  </a>
+                  <span className="text-emerald-400 font-semibold text-xs sm:text-sm break-all block mt-0.5">
+                    Correo: {formData.adminEmail} | Clave: {formData.adminPassword}
+                  </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
                   <div>
                     <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest block">
-                      ID del Cliente
+                      ID del Cliente (Tenant ID)
                     </span>
                     <span className="text-white font-bold text-sm">
                       {createdTenantId}

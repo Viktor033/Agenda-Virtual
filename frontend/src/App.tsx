@@ -14,8 +14,9 @@ function App() {
     setView('landing');
   };
 
-  const handleRegisterSuccess = (_email: string, tenantId: number) => {
+  const handleRegisterSuccess = (email: string, tenantId: number) => {
     localStorage.setItem('active_tenant_id', tenantId.toString());
+    localStorage.setItem('remembered_email', email);
     setView('login');
   };
 

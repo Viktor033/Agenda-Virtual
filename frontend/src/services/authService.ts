@@ -32,6 +32,10 @@ export interface UserSession {
 export async function login(request: LoginRequest): Promise<UserSession> {
   const { data } = await api.post<LoginResponse>('/auth/login', request);
 
+  if (!data || typeof data !== 'object' || !data.token || !data.email) {
+    throw new Error('Backend no disponible');
+  }
+
   // Persistir token y tenant para los interceptores de axios
   localStorage.setItem('auth_token', data.token);
   localStorage.setItem('active_tenant_id', String(data.tenantId));

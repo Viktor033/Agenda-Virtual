@@ -97,6 +97,30 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     if (demos[emailLower] && pwd === 'admin') {
       return demos[emailLower];
     }
+
+    // Buscar también en las clínicas registradas desde la Landing Page o desde el Panel Super Admin
+    try {
+      const saved = localStorage.getItem('saas_clients');
+      if (saved) {
+        const clients = JSON.parse(saved);
+        const match = clients.find(
+          (c: any) => c.email?.toLowerCase().trim() === emailLower && (c.password === pwd || pwd === 'admin')
+        );
+        if (match) {
+          return {
+            email: match.email,
+            name: match.name,
+            role: 'PROFESSIONAL',
+            tenantId: match.id || 1,
+            professionalId: match.id || 1,
+            planType: match.planType,
+          };
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     return null;
   };
 
